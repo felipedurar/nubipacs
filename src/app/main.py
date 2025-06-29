@@ -16,6 +16,7 @@ async def main():
     # Init DB
     init_db()
 
+    # Load the Services
     load_services()
 
     # # Start DICOM server in a separate thread
