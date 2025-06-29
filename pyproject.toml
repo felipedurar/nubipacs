@@ -3,16 +3,20 @@ name = "nubipacs"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Felipe Durar",email = "felipe.malaquias@venturus.org.br"}
+    {name = "Felipe Durar",email = "feli.durar@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi (>=0.115.14,<0.116.0)",
+    "uvicorn (>=0.35.0,<0.36.0)",
+    "mongoengine (>=0.29.1,<0.30.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "pydantic[email] (>=2.11.7,<3.0.0)"
 ]
 
 [tool.poetry]
-packages = [{include = "nubipacs", from = "src"}]
-
+packages = [{include = "app", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
