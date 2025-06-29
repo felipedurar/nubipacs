@@ -1,5 +1,5 @@
 from mongoengine import connect
-from .config import settings
+from app.config import settings
 
 def init_db():
     connect(
