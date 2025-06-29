@@ -1,0 +1,18 @@
+[
+  {
+    "name": "dicom",
+    "type": "DICOM_SERVER",
+    "params": {
+      "port": 11112,
+      "aplication_entities": [
+        {
+          "scp_aetitle": "NUBIPACS",
+          "scu_aetitle": "CT_TEST",
+          "storage_services": [
+            "local-bs"
+          ]
+        }
+      ]
+    }
+  }
+]

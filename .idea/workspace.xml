@@ -5,19 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2008467c-08ef-49cb-9321-30c2e11eb4f1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/app/management/routes/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/management/schemas/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/management/server.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/services.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/database/models/service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/service_mgmt.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/database/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/database/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/database/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/database/models/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/database/models/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/routes/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dicom/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/routes/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/management/routes/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/run.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/schemas/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dicomweb/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/schemas/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/management/schemas/user.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
