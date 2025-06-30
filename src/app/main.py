@@ -28,7 +28,6 @@ async def main():
     #
     # # Start FastAPI
     # await start_fastapi()
-    print("Print From Async")
     #pass
 
 if __name__ == "__main__":

@@ -36,3 +36,7 @@ def load_services():
 
 def list_services():
     return _services
+
+def start_services():
+    # AA
+    pass

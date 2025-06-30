@@ -301,6 +301,25 @@ files = [
 typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
+name = "pydicom"
+version = "3.0.1"
+description = "A pure Python package for reading and writing DICOM data"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "pydicom-3.0.1-py3-none-any.whl", hash = "sha256:db32f78b2641bd7972096b8289111ddab01fb221610de8d7afa835eb938adb41"},
+    {file = "pydicom-3.0.1.tar.gz", hash = "sha256:7b8be344b5b62493c9452ba6f5a299f78f8a6ab79786c729b0613698209603ec"},
+]
+
+[package.extras]
+basic = ["numpy", "types-pydicom"]
+dev = ["black (==24.8.0)", "mypy (==1.11.2)", "pre-commit", "pydicom-data", "pytest", "pytest-cov", "ruff (==0.6.3)", "types-requests"]
+docs = ["matplotlib", "numpy", "numpydoc", "pillow", "sphinx", "sphinx-copybutton", "sphinx-gallery", "sphinx_rtd_theme", "sphinxcontrib-jquery", "sphinxcontrib-napoleon"]
+gpl-license = ["pylibjpeg[libjpeg]"]
+pixeldata = ["numpy", "pillow", "pyjpegls", "pylibjpeg[openjpeg]", "pylibjpeg[rle]", "python-gdcm"]
+
+[[package]]
 name = "pymongo"
 version = "4.13.2"
 description = "PyMongo - the Official MongoDB Python driver"
@@ -379,6 +398,27 @@ ocsp = ["certifi ; os_name == \"nt\" or sys_platform == \"darwin\"", "cryptograp
 snappy = ["python-snappy"]
 test = ["pytest (>=8.2)", "pytest-asyncio (>=0.24.0)"]
 zstd = ["zstandard"]
+
+[[package]]
+name = "pynetdicom"
+version = "3.0.1"
+description = "A Python implementation of the DICOM networking protocol"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "pynetdicom-3.0.1-py3-none-any.whl", hash = "sha256:a9da287a25c99cc85b3472c1ea48d4fd9ced4ea8920fd4444d0f9f9a8984b17d"},
+    {file = "pynetdicom-3.0.1.tar.gz", hash = "sha256:bd75be21535d8129d1a0014814079c32bbddb1df04ff6b8cba4b4cb4fd7e67f8"},
+]
+
+[package.dependencies]
+pydicom = ">=3,<4"
+
+[package.extras]
+apps = ["sqlalchemy"]
+dev = ["asv (>=0.6)", "black (>=23.1)", "codespell (>=2.2)", "coverage (>=7.3)", "mypy (>=1.11)", "pyfakefs (>=5.3)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "ruff (>=0.1)", "sqlalchemy (>=2.0)"]
+docs = ["numpydoc (>=1.6)", "pydata-sphinx-theme (>=0.16.1)", "sphinx (>=7.2)", "sphinx-copybutton (>=0.5)", "sphinxcontrib-jquery (>=4.1)"]
+tests = ["coverage (>=7.3)", "pyfakefs (>=5.3)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "sqlalchemy (>=2.0)"]
 
 [[package]]
 name = "python-dotenv"
@@ -474,4 +514,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "2dfd07a53f51c7733d8a70acdc96304616d342090cb81b9db1094042b0450010"
+content-hash = "05ab0aa3c2e5d41200bf432722a92de04400576a605057881ccaec60d274e521"

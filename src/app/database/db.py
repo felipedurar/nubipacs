@@ -10,10 +10,5 @@ def init_db():
     #     alias="default"
     # )
     connect(
-        db="nubipacs",
-        username="admin",
-        password="123456",
-        host="localhost",
-        port=27017,
-        authentication_source="admin"
+        host = "mongodb://admin:123456@localhost:27017/nubipacs?authSource=admin"
     )
