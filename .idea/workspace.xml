@@ -5,16 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2008467c-08ef-49cb-9321-30c2e11eb4f1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/app/dicom/dicom_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/service_management/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/service_management/pacs_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/service_management/services_manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/utils/singleton_meta.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/services.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/services.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/dicom/dicom_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dicom/dicom_server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/dicom/dicom_server_manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dicom/dicom_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dicom/dicom_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/service_mgmt.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/service_management/services_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/service_management/services_loader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/service_management/services_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/service_management/services_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

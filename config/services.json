@@ -3,6 +3,7 @@
     "name": "dicom",
     "type": "DICOM_SERVER",
     "params": {
+      "ae_title": "NUBIPACS",
       "port": 11112,
       "aplication_entities": [
         {

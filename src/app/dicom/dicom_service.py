@@ -1,11 +1,13 @@
 from app.service_management.pacs_service import PACSService
-from dicom_server import DicomServer
+from app.dicom.dicom_server import DicomServer
 import threading
 
 class DicomService(PACSService):
-    def __init__(self, params):
+    def __init__(self, name, type, params):
         self._thread = None
         self._running = False
+        self.name = name
+        self.type = type
         self.dicom_server = DicomServer()
         self.dicom_server.load_params(params)
 
