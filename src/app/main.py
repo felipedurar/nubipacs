@@ -15,6 +15,7 @@ from database.db import init_db
 
 services_manager = ServicesManager()
 
+
 async def main():
     # Init DB
     init_db()
@@ -37,7 +38,8 @@ async def main():
     #
     # # Start FastAPI
     # await start_fastapi()
-    #pass
+    # pass
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -13,7 +13,9 @@ dependencies = [
     "mongoengine (>=0.29.1,<0.30.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
     "pydantic[email] (>=2.11.7,<3.0.0)",
-    "pynetdicom (>=3.0.1,<4.0.0)"
+    "pynetdicom (>=3.0.1,<4.0.0)",
+    "black (>=25.1.0,<26.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)"
 ]
 
 [tool.poetry]
@@ -22,3 +24,15 @@ packages = [{include = "app", from = "src"}]
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+exclude = '''
+/(
+  \.git
+  | \.venv
+  | build
+  | dist
+)/
+'''
