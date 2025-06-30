@@ -1,10 +1,7 @@
 
 import asyncio
-#import uvicorn
-import threading
-#from fastapi import FastAPI
 from database.db import init_db
-from service_mgmt import load_services
+from service_management.services_loader import load_services
 
 async def main():
     # Show Logo

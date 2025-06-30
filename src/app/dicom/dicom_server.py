@@ -4,6 +4,7 @@ from pydicom.dataset import Dataset
 
 class DicomServer:
     def __init__(self):
+        self.server = None
         self.ae = None
         self.handlers = []
 
@@ -57,4 +58,7 @@ class DicomServer:
         yield (0x0000, None)  # Success
 
     def start_server(self):
-        self.ae.start_server(('0.0.0.0', 11112), block=True, evt_handlers=self.handlers)
+        self.server = self.ae.start_server(('0.0.0.0', 11112), block=True, evt_handlers=self.handlers)
+
+    def stop_server(self):
+        self.server.shutdown()
