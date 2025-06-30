@@ -13,3 +13,12 @@ or
 ```flake8 .```
 or
 ```flake8 src/app/main.py```
+
+## Export Requirements With Poetry
+### First install the Plugin
+```poetry self add poetry-plugin-export```
+Them ...
+### Generate Without Hashes
+```poetry export -f requirements.txt --output requirements.txt --without-hashes```
+### Generate  With Hashes
+```poetry export -f requirements.txt --output requirements.txt```
