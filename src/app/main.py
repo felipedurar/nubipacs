@@ -10,11 +10,11 @@ print(" ===========================================================")
 
 from app.service_management.services_manager import ServicesManager
 from database.db import init_db
-
+from app.pacs_api.pacs_api import PacsAPI
 import asyncio
 
 services_manager = ServicesManager()
-
+pacs_api = PacsAPI()
 
 async def main():
     # Init DB
@@ -25,9 +25,11 @@ async def main():
     services_manager.initialize_services()
     services_manager.start_services()
 
-    # Block the Thread
-    while len(services_manager.services) > 0:
-        await asyncio.sleep(10)
+    await pacs_api.start_pacs_api()
+
+    # # Block the Thread
+    # while len(services_manager.services) > 0:
+    #     await asyncio.sleep(10)
 
     # # Start DICOM server in a separate thread
     # dicom_thread = threading.Thread(target=run_dicom_server, daemon=True)

@@ -29,4 +29,5 @@ class DicomService(PACSService):
         self.start()
 
     def _run(self):
+        self.dicom_server.initialize_server()
         self.dicom_server.start_server()

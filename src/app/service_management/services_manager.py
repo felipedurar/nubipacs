@@ -1,7 +1,9 @@
 from app.dicom.dicom_service import DicomService
+from app.service_management.pacs_service import PACSService
 from app.utils.singleton_meta import SingletonMeta
 from app.database.models.service import Service
 import json, os
+from typing import List
 
 class ServicesManager(metaclass=SingletonMeta):
     SERVICES_FILE = "services.json"
@@ -10,7 +12,7 @@ class ServicesManager(metaclass=SingletonMeta):
         print("Initializing ServicesManager...")
         self.settings = {}
         self.services_config = []
-        self.services = []
+        self.services: List[PACSService] = []
 
     def restore_from_file(self):
         """
@@ -62,23 +64,3 @@ class ServicesManager(metaclass=SingletonMeta):
             print(f"Starting Service {c_service.name} (Type: {c_service.type})")
             c_service.start()
 
-    # def set(self, key, value):
-    #     self.settings[key] = value
-    #
-    # def get(self, key, default=None):
-    #     return self.settings.get(key, default)
-
-# class ServicesManager:
-#     def __init__(self):
-#         pass
-
-# def test_function(p1, p2, p3):
-#     """
-#     test_function does blah blah blah.
-#
-#     :param p1: describe about parameter p1
-#     :param p2: describe about parameter p2
-#     :param p3: describe about parameter p3
-#     :return: describe what it returns
-#     """
-#     pass

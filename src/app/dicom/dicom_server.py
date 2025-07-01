@@ -5,7 +5,6 @@ from pynetdicom import AE, debug_logger
 from pynetdicom.transport import ThreadedAssociationServer
 from pynetdicom.sop_class import StudyRootQueryRetrieveInformationModelFind
 from pynetdicom.events import Event
-import json
 from typing import Optional
 from pydantic import ValidationError
 
@@ -28,8 +27,14 @@ class DicomServer:
             print(e.json())
             return True
 
+    def initialize_server(self):
         self.scp_ae = AE(ae_title=self.dicom_server_params.ae_title)
         self.scp_ae.supported_contexts = AllStoragePresentationContexts
+
+        # C-ECHO
+        #self.scp_ae.add_supported_context(VerificationSOPClass)
+
+        # C-FIND
         self.scp_ae.add_supported_context(StudyRootQueryRetrieveInformationModelFind)
 
         self.handlers.append((evt.EVT_REQUESTED, self.handle_association_request))
