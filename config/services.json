@@ -4,11 +4,14 @@
     "type": "DICOM_SERVER",
     "params": {
       "ae_title": "NUBIPACS",
+      "bind": "0.0.0.0",
       "port": 11112,
       "aplication_entities": [
         {
-          "scp_aetitle": "NUBIPACS",
-          "scu_aetitle": "CT_TEST",
+          "ae_title": "WEASIS_AE",
+          "allowed_ips": [],
+          "blocked_ips": [],
+          "allowed_services": ["C-FIND, C-STORE", "C-GET", "C-MOVE", "C-ECHO"],
           "storage_services": [
             "local-bs"
           ]

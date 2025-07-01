@@ -3,12 +3,14 @@ from app.dicom.dicom_server import DicomServer
 import threading
 
 class DicomService(PACSService):
-    def __init__(self, name, type, params):
+    def __init__(self, name, type):
         self._thread = None
         self._running = False
         self.name = name
         self.type = type
         self.dicom_server = DicomServer()
+
+    def load_params(self, params):
         self.dicom_server.load_params(params)
 
     def start(self):

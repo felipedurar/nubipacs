@@ -8,10 +8,10 @@ print(" == NubiPACS - Picture Archiving and Communication System ==")
 print(" == By Felipe Durar                                       ==")
 print(" ===========================================================")
 
-import asyncio
-
 from app.service_management.services_manager import ServicesManager
 from database.db import init_db
+
+import asyncio
 
 services_manager = ServicesManager()
 

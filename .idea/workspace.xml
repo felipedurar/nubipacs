@@ -5,8 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2008467c-08ef-49cb-9321-30c2e11eb4f1" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/app/dicom/schemas/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/dicom/schemas/dicom_server_application_entity.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/dicom/schemas/dicom_server_params.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/services.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/services.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/dicom/dicom_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dicom/dicom_server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dicom/dicom_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dicom/dicom_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/service_management/pacs_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/service_management/pacs_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/service_management/services_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/service_management/services_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -32,17 +39,17 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/felipe_malaquias/Repositories/nubipacs/src/app/service_management",
+    "last_opened_file_path": "/home/felipe_malaquias/Repositories/nubipacs/src/app/dicom/schemas",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/app/dicom/schemas" />
       <recent name="$PROJECT_DIR$/src/app/service_management" />
       <recent name="$PROJECT_DIR$/src/app/dicomweb" />
       <recent name="$PROJECT_DIR$/src/app/dicom" />
       <recent name="$PROJECT_DIR$/src/app/routes" />
-      <recent name="$PROJECT_DIR$/src/app/schemas" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/app/service_management" />

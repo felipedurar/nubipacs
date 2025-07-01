@@ -48,13 +48,14 @@ class ServicesManager(metaclass=SingletonMeta):
 
     def initialize_services(self):
         for c_service in self.services_config:
-            print(c_service)
-            print(c_service.name)
-            print(c_service.type)
-            if c_service.type == 'DICOM_SERVER':
-                print(f"Initializing DICOM Service - {c_service.name}")
-                new_dicom_service = DicomService(c_service.name, c_service.type, c_service.params)
-                self.services.append(new_dicom_service)
+            match c_service.type:
+                case "DICOM_SERVER":
+                    print(f"Initializing DICOM Service - {c_service.name}")
+                    new_dicom_service = DicomService(c_service.name, c_service.type)
+                    new_dicom_service.load_params(c_service.params)
+                    self.services.append(new_dicom_service)
+                case _:
+                    print(f"Unknown Service - {c_service.name}")
 
     def start_services(self):
         for c_service in self.services:
