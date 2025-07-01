@@ -10,7 +10,7 @@ from typing import Optional
 from pydantic import ValidationError
 import os, io
 
-from app.dicom.schemas.dicom_server_params import DicomServerParams
+from nubipacs.dicom.schemas.dicom_server_params import DicomServerParams
 
 debug_logger()
 

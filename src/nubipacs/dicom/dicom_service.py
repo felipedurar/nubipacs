@@ -1,5 +1,5 @@
-from app.service_management.pacs_service import PACSService
-from app.dicom.dicom_server import DicomServer
+from nubipacs.service_management.pacs_service import PACSService
+from nubipacs.dicom.dicom_server import DicomServer
 import threading
 
 class DicomService(PACSService):

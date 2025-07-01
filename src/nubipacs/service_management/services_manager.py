@@ -1,7 +1,7 @@
-from app.dicom.dicom_service import DicomService
-from app.service_management.pacs_service import PACSService
-from app.utils.singleton_meta import SingletonMeta
-from app.database.models.service import Service
+from nubipacs.dicom.dicom_service import DicomService
+from nubipacs.service_management.pacs_service import PACSService
+from nubipacs.utils.singleton_meta import SingletonMeta
+from nubipacs.database.models.service import Service
 import json, os
 from typing import List
 
@@ -63,4 +63,3 @@ class ServicesManager(metaclass=SingletonMeta):
         for c_service in self.services:
             print(f"Starting Service {c_service.name} (Type: {c_service.type})")
             c_service.start()
-

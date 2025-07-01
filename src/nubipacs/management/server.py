@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.database.db import init_db
+from nubipacs.database.db import init_db
 from routes import user
 
 app = FastAPI(title="NubiPACS - Management")

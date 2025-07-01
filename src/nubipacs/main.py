@@ -8,9 +8,9 @@ print(" == NubiPACS - Picture Archiving and Communication System ==")
 print(" == By Felipe Durar                                       ==")
 print(" ===========================================================")
 
-from app.service_management.services_manager import ServicesManager
+from nubipacs.service_management.services_manager import ServicesManager
 from database.db import init_db
-from app.pacs_api.pacs_api import PacsAPI
+from nubipacs.pacs_api.pacs_api import PacsAPI
 import asyncio
 
 services_manager = ServicesManager()

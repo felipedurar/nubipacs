@@ -1,5 +1,5 @@
 from mongoengine import connect
-from app.config import settings
+from nubipacs.config import settings
 
 def init_db():
     # connect(
