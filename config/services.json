@@ -1,6 +1,7 @@
 [
   {
     "name": "dicom",
+    "description": "DICOM Server",
     "type": "DICOM_SERVER",
     "params": {
       "ae_title": "NUBIPACS",
@@ -17,6 +18,18 @@
           ]
         }
       ]
+    }
+  },
+  {
+    "name": "local-bs",
+    "description": "Local Block Storage",
+    "type": "DCM_STORAGE",
+    "params": {
+      "metadata_db": "mongodb://admin:123456@localhost:27017/nubipacs?authSource=admin",
+      "target_type": "block-storage",
+      "params": {
+        "path": "dicom_store"
+      }
     }
   }
 ]

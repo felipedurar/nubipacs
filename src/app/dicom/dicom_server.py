@@ -4,13 +4,18 @@ from pydicom.dataset import Dataset
 from pynetdicom import AE, debug_logger
 from pynetdicom.transport import ThreadedAssociationServer
 from pynetdicom.sop_class import StudyRootQueryRetrieveInformationModelFind
+from pynetdicom.sop_class import CTImageStorage, MRImageStorage, DigitalXRayImageStorageForPresentation
 from pynetdicom.events import Event
 from typing import Optional
 from pydantic import ValidationError
+import os, io
 
 from app.dicom.schemas.dicom_server_params import DicomServerParams
 
 debug_logger()
+
+OUTPUT_DIR = 'dicom_store'
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 class DicomServer:
     def __init__(self):
@@ -36,6 +41,16 @@ class DicomServer:
 
         # C-FIND
         self.scp_ae.add_supported_context(StudyRootQueryRetrieveInformationModelFind)
+
+        # C-STORE
+        # Add supported presentation contexts
+        storage_classes = [
+            CTImageStorage,
+            MRImageStorage,
+            DigitalXRayImageStorageForPresentation
+        ]
+        for storage_sop in storage_classes:
+            self.scp_ae.add_supported_context(storage_sop)
 
         self.handlers.append((evt.EVT_REQUESTED, self.handle_association_request))
         self.handlers.append((evt.EVT_ACCEPTED, self.handle_association_accepted))
@@ -88,14 +103,29 @@ class DicomServer:
         return 0x0000  # Success status
 
     def handle_store(self, event):
+        """Handle a C-STORE request event"""
+        # Get the dataset from the event
         ds = event.dataset
         ds.file_meta = event.file_meta
 
-        # Save the dataset to file
-        ds.save_as(f"{ds.SOPInstanceUID}.dcm", write_like_original=False)
-        print(f"Stored DICOM file: {ds.SOPInstanceUID}.dcm")
+        # Extract UIDs
+        study_uid = ds.StudyInstanceUID
+        series_uid = ds.SeriesInstanceUID
+        instance_uid = ds.SOPInstanceUID
 
-        return 0x0000  # Success
+        # Create directory structure
+        study_path = os.path.join(OUTPUT_DIR, study_uid)
+        series_path = os.path.join(study_path, series_uid)
+        os.makedirs(series_path, exist_ok=True)
+
+        # Save file
+        filename = os.path.join(series_path, f"{instance_uid}.dcm")
+        ds.save_as(filename, write_like_original=False)
+
+        print(f"Stored: {filename}")
+
+        # Return a 'Success' status
+        return 0x0000
 
     def handle_find(self, event):
         ds = event.identifier

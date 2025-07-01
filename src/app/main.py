@@ -27,21 +27,6 @@ async def main():
 
     await pacs_api.start_pacs_api()
 
-    # # Block the Thread
-    # while len(services_manager.services) > 0:
-    #     await asyncio.sleep(10)
-
-    # # Start DICOM server in a separate thread
-    # dicom_thread = threading.Thread(target=run_dicom_server, daemon=True)
-    # dicom_thread.start()
-    #
-    # # Start background async task
-    # asyncio.create_task(periodic_task())
-    #
-    # # Start FastAPI
-    # await start_fastapi()
-    # pass
-
 
 if __name__ == "__main__":
     asyncio.run(main())
