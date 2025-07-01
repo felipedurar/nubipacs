@@ -2,6 +2,8 @@
 from pynetdicom import AE, evt, AllStoragePresentationContexts, VerificationPresentationContexts
 from pydicom.dataset import Dataset
 from pynetdicom import AE, debug_logger
+from pynetdicom.sop_class import StudyRootQueryRetrieveInformationModelFind
+import json
 
 debug_logger()
 
@@ -14,6 +16,7 @@ class DicomServer:
     def load_params(self, params):
         self.ae = AE(ae_title=params["ae_title"])
         self.ae.supported_contexts = AllStoragePresentationContexts
+        self.ae.add_supported_context(StudyRootQueryRetrieveInformationModelFind)
         self.handlers.append((evt.EVT_REQUESTED, self.handle_association_request))
         self.handlers.append((evt.EVT_ACCEPTED, self.handle_association_accepted))
         self.handlers.append((evt.EVT_C_ECHO, self.handle_echo))
@@ -21,6 +24,11 @@ class DicomServer:
         self.handlers.append((evt.EVT_C_FIND, self.handle_find))
 
     def handle_association_request(self, event):
+        print(" == ASSOCIATION REQUEST ==")
+        print(event.assoc.requestor.address)
+        print(event.assoc.requested_contexts)
+
+        #print(json.dumps(event.event))
         # calling_aet = event.assoc.requestor.ae_title.strip()
         # print(f"Received association request from: {calling_aet}")
         #
