@@ -5,24 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2008467c-08ef-49cb-9321-30c2e11eb4f1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/database/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/dicom_block_storage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/schemas/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/schemas/dicom_block_storage_params.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_interface.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/schemas/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/schemas/dicom_storage_params.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_instance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/services.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/services.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom/schemas/dicom_server_application_entity.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom/schemas/dicom_server_application_entity.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/service_management/pacs_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/service_management/pacs_service_interface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/service_management/services_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/service_management/services_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/dicom_block_storage.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/dicom_block_storage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -2,6 +2,7 @@ from nubipacs.dicom_storage.dicom_block_storage.dicom_block_storage import Dicom
 from nubipacs.dicom_storage.dicom_storage_interface import DicomStorageInterface
 from nubipacs.dicom_storage.schemas.dicom_storage_params import DicomStorageParams
 from nubipacs.service_management.pacs_service_interface import PACSServiceInterface
+from mongoengine import connect, register_connection
 from pydantic import ValidationError
 from typing import Optional
 import threading
@@ -23,11 +24,18 @@ class DicomStorageService(PACSServiceInterface):
             print(e.json())
             return True
 
+        # Start Dataase connection
+        register_connection(
+            alias=self.name,
+            name=self.name,
+            host=self.dicom_storage_params.metadata_db
+        )
+
         # Create Storage Type
         match self.dicom_storage_params.target_type:
             case "block-storage":
                 self.dicom_storage = DicomBlockStorage()
-                self.dicom_storage.load_params(self.dicom_storage_params.params)
+                self.dicom_storage.load_params(self.name, self.dicom_storage_params.params)
 
 
     def start(self):
