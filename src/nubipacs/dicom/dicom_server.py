@@ -121,47 +121,45 @@ class DicomServer:
         ds = event.dataset
         ds.file_meta = event.file_meta
 
+        # Get AE Title of the requester
         requestor_ae_title = event.assoc.requestor.ae_title
         print(f"Incoming C-STORE from AE Title: {requestor_ae_title}")
 
+        # Get service and call storage handler
         c_storage_service = self.storage_services[requestor_ae_title]
         c_storage_service.dicom_storage.save_dicom(ds)
-
-        # # Extract UIDs
-        # study_uid = ds.StudyInstanceUID
-        # series_uid = ds.SeriesInstanceUID
-        # instance_uid = ds.SOPInstanceUID
-        #
-        # # Create directory structure
-        # study_path = os.path.join(OUTPUT_DIR, study_uid)
-        # series_path = os.path.join(study_path, series_uid)
-        # os.makedirs(series_path, exist_ok=True)
-        #
-        # # Save file
-        # filename = os.path.join(series_path, f"{instance_uid}.dcm")
-        # ds.save_as(filename, write_like_original=False)
-        #
-        # print(f"Stored: {filename}")
-
-        # Return a 'Success' status
         return 0x0000
 
     def handle_find(self, event):
+        # Get AE Title of the requester
+        requestor_ae_title = event.assoc.requestor.ae_title
+        print(f"Incoming C-STORE from AE Title: {requestor_ae_title}")
+
+        # Get the dataset (the actual query fields)
         ds = event.identifier
-        print(f"Received C-FIND request: {ds}")
+        print("C-FIND Query Dataset:")
+        print(ds)
 
-        # Example response dataset
-        rsp = Dataset()
-        rsp.PatientName = 'DOE^JOHN'
-        rsp.PatientID = '123456'
-        rsp.StudyInstanceUID = '1.2.3.4.5'
-        rsp.QueryRetrieveLevel = 'PATIENT'
+        # Extract DICOM tags used in the query
+        print("Tags used in query:")
+        for elem in ds:
+            print(f"{elem.tag} - {elem.name} - {elem.value}")
 
-        # Yield one or more matches
-        yield (0xFF00, rsp)  # Pending
+        # Get service and call storage handler
+        c_storage_service = self.storage_services[requestor_ae_title]
+        c_storage_service.dicom_storage.find_dicom(ds)
 
-        # Signal completion
-        yield (0x0000, None)  # Success
+        # Example: Respond with a fake result if PatientName is '*'
+        if 'PatientName' in ds and ds.PatientName == '*':
+            match = Dataset()
+            match.PatientName = 'DOE^JOHN'
+            match.PatientID = '123456'
+            match.StudyInstanceUID = '1.2.3.4.5.6'
+            match.StudyDate = '20250101'
+            yield 0xFF00, match
+
+        # Final status
+        yield 0x0000, None
 
     def start_server(self):
         dicom_bind_address = str(self.dicom_server_params.bind)

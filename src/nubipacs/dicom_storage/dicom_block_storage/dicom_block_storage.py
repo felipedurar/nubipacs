@@ -4,11 +4,23 @@ from typing import Optional
 from pydantic import ValidationError
 from pydicom import Dataset, DataElement
 from pydicom.tag import Tag
+from pydicom.multival import MultiValue
+from pydicom.valuerep import PersonName
 from mongoengine.context_managers import switch_db
 import os
 
 from nubipacs.dicom_storage.models.dcm_instance import DcmInstance
 
+store_metadata_dicom_tags = [
+    "00100020", "00100010", "00100030", "00100040",
+    "0020000D", "00080020", "00080030", "00080050",
+    "00200010", "00081030", "00080090", "00080061",
+    "00201000", "00201002", "0020000E", "00200011",
+    "0008103E", "00080060", "00180015", "00200060",
+    "00201209", "00080021", "00080018", "00200013",
+    "00080008", "00080022", "00080023", "00280010",
+    "00280100", "00280004", "00280030"
+]
 
 class DicomBlockStorage(DicomStorageInterface):
 
@@ -50,17 +62,23 @@ class DicomBlockStorage(DicomStorageInterface):
             c_instance = DcmInstanceDB()
             for elem in dataset:
                 element_pair = self.filter_dicom_tag(elem)
-                #c_instance[element_pair[0]] = element_pair[1]
-            #c_instance.save()
+                if element_pair[0] in store_metadata_dicom_tags:
+                    if isinstance(element_pair[1], MultiValue):
+                        c_instance[element_pair[0]] = list(element_pair[1])
+                    elif isinstance(element_pair[1], PersonName):
+                        c_instance[element_pair[0]] = str(element_pair[1])
+                    else:
+                        c_instance[element_pair[0]] = element_pair[1]
+            c_instance.save()
 
     def filter_dicom_tag(self, elem: DataElement):
         tag_hex = f"{elem.tag.group:04X}{elem.tag.element:04X}"
         if elem.VR == 'OB' or elem.VR == 'OW' or elem.VR == 'OF' or elem.VR == 'UN' or elem.tag == Tag(0x7FE0,
                                                                                                        0x0010):  # PixelData
-            print(f"{elem.tag} {tag_hex} {elem.name} = <binary data skipped>")
+            #print(f"{elem.tag} {tag_hex} {elem.name} = <binary data skipped>")
             return (tag_hex, '<binary data skipped>')
         else:
-            print(f"{elem.tag} {tag_hex} {elem.name} = {elem.value}")
+            #print(f"{elem.tag} {tag_hex} {elem.name} = {elem.value}")
             return (tag_hex, elem.value)
 
 
