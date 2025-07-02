@@ -1,8 +1,8 @@
-from nubipacs.service_management.pacs_service import PACSService
+from nubipacs.service_management.pacs_service_interface import PACSServiceInterface
 from nubipacs.dicom.dicom_server import DicomServer
 import threading
 
-class DicomService(PACSService):
+class DicomService(PACSServiceInterface):
     def __init__(self, name, type):
         self._thread = None
         self._running = False

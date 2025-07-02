@@ -1,5 +1,6 @@
 from nubipacs.dicom.dicom_service import DicomService
-from nubipacs.service_management.pacs_service import PACSService
+from nubipacs.dicom_storage.dicom_storage_service import DicomStorageService
+from nubipacs.service_management.pacs_service_interface import PACSServiceInterface
 from nubipacs.utils.singleton_meta import SingletonMeta
 from nubipacs.database.models.service import Service
 import json, os
@@ -12,7 +13,7 @@ class ServicesManager(metaclass=SingletonMeta):
         print("Initializing ServicesManager...")
         self.settings = {}
         self.services_config = []
-        self.services: List[PACSService] = []
+        self.services: List[PACSServiceInterface] = []
 
     def restore_from_file(self):
         """
@@ -56,6 +57,11 @@ class ServicesManager(metaclass=SingletonMeta):
                     new_dicom_service = DicomService(c_service.name, c_service.type)
                     new_dicom_service.load_params(c_service.params)
                     self.services.append(new_dicom_service)
+                case "DCM_STORAGE":
+                    print(f"Initializing DCM_STORAGE Service - {c_service.name}")
+                    new_storage_service = DicomStorageService(c_service.name, c_service.type)
+                    new_storage_service.load_params(c_service.params)
+                    self.services.append(new_storage_service)
                 case _:
                     print(f"Unknown Service - {c_service.name}")
 
@@ -63,3 +69,9 @@ class ServicesManager(metaclass=SingletonMeta):
         for c_service in self.services:
             print(f"Starting Service {c_service.name} (Type: {c_service.type})")
             c_service.start()
+
+    def find_service_by_name(self, name):
+        for c_service in self.services:
+            if c_service.name == name:
+                return c_service
+        return None

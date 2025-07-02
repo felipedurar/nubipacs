@@ -9,13 +9,11 @@ from pynetdicom.events import Event
 from typing import Optional
 from pydantic import ValidationError
 import os, io
-
 from nubipacs.dicom.schemas.dicom_server_params import DicomServerParams
+from nubipacs.dicom_storage.dicom_storage_service import DicomStorageService
+from typing import Dict
 
 debug_logger()
-
-OUTPUT_DIR = 'dicom_store'
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 class DicomServer:
     def __init__(self):
@@ -23,6 +21,7 @@ class DicomServer:
         self.scp_ae: Optional[AE] = None
         self.handlers = []
         self.dicom_server_params: Optional[DicomServerParams] = None
+        self.storage_services: Dict[str, DicomStorageService] = {}
 
     def load_params(self, params):
         # Validate Service Params
@@ -57,6 +56,20 @@ class DicomServer:
         self.handlers.append((evt.EVT_C_ECHO, self.handle_echo))
         self.handlers.append((evt.EVT_C_STORE, self.handle_store))
         self.handlers.append((evt.EVT_C_FIND, self.handle_find))
+
+        # Lazy Load the Services Manager
+        from nubipacs.service_management.services_manager import ServicesManager
+        services_manager = ServicesManager()
+
+        # Find the storage service for each application entity
+        for c_scu_ae in self.dicom_server_params.aplication_entities:
+            self.storage_services[c_scu_ae.ae_title] = services_manager.find_service_by_name(c_scu_ae.storage_service)
+            if self.storage_services[c_scu_ae.ae_title] is None:
+                print(f"Fatal: Could not find the Storage Service for Application Entity {c_scu_ae.ae_title}")
+
+            storage_service_name = self.storage_services[c_scu_ae.ae_title].name
+            print(f" Mapped Storage Service '{storage_service_name}' to RemoteAE '{c_scu_ae.ae_title}' for "
+                  f"LocalAE '{self.dicom_server_params.ae_title}'")
 
     def find_scu_ae_by_ae_title(self, ae_title):
         for c_scu_ae in self.dicom_server_params.aplication_entities:
@@ -108,21 +121,27 @@ class DicomServer:
         ds = event.dataset
         ds.file_meta = event.file_meta
 
-        # Extract UIDs
-        study_uid = ds.StudyInstanceUID
-        series_uid = ds.SeriesInstanceUID
-        instance_uid = ds.SOPInstanceUID
+        requestor_ae_title = event.assoc.requestor.ae_title
+        print(f"Incoming C-STORE from AE Title: {requestor_ae_title}")
 
-        # Create directory structure
-        study_path = os.path.join(OUTPUT_DIR, study_uid)
-        series_path = os.path.join(study_path, series_uid)
-        os.makedirs(series_path, exist_ok=True)
+        c_storage_service = self.storage_services[requestor_ae_title]
+        c_storage_service.dicom_storage.save_dicom(ds)
 
-        # Save file
-        filename = os.path.join(series_path, f"{instance_uid}.dcm")
-        ds.save_as(filename, write_like_original=False)
-
-        print(f"Stored: {filename}")
+        # # Extract UIDs
+        # study_uid = ds.StudyInstanceUID
+        # series_uid = ds.SeriesInstanceUID
+        # instance_uid = ds.SOPInstanceUID
+        #
+        # # Create directory structure
+        # study_path = os.path.join(OUTPUT_DIR, study_uid)
+        # series_path = os.path.join(study_path, series_uid)
+        # os.makedirs(series_path, exist_ok=True)
+        #
+        # # Save file
+        # filename = os.path.join(series_path, f"{instance_uid}.dcm")
+        # ds.save_as(filename, write_like_original=False)
+        #
+        # print(f"Stored: {filename}")
 
         # Return a 'Success' status
         return 0x0000

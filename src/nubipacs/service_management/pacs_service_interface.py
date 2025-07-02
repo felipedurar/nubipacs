@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class PACSService(ABC):
+class PACSServiceInterface(ABC):
     name: str
     type: str
 

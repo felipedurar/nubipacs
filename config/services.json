@@ -13,9 +13,7 @@
           "allowed_ips": [],
           "blocked_ips": [],
           "allowed_services": ["C-FIND, C-STORE", "C-GET", "C-MOVE", "C-ECHO"],
-          "storage_services": [
-            "local-bs"
-          ]
+          "storage_service": "local-bs"
         }
       ]
     }

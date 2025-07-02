@@ -6,4 +6,5 @@ class DicomServerApplicationEntity(BaseModel):
     allowed_ips: List[IPvAnyAddress]
     blocked_ips: List[IPvAnyAddress]
     allowed_services: List[str]
-    storage_services: List[str]
+    storage_service: str
+    #storage_services: List[str]
