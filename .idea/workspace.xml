@@ -8,6 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/dicom_block_storage.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_block_storage/dicom_block_storage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_instance.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_instance.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

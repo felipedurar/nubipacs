@@ -147,16 +147,8 @@ class DicomServer:
 
         # Get service and call storage handler
         c_storage_service = self.storage_services[requestor_ae_title]
-        c_storage_service.dicom_storage.find_dicom(ds)
-
-        # Example: Respond with a fake result if PatientName is '*'
-        if 'PatientName' in ds and ds.PatientName == '*':
-            match = Dataset()
-            match.PatientName = 'DOE^JOHN'
-            match.PatientID = '123456'
-            match.StudyInstanceUID = '1.2.3.4.5.6'
-            match.StudyDate = '20250101'
-            yield 0xFF00, match
+        for c_study in c_storage_service.dicom_storage.find_dicom(ds):
+            yield 0xFF00, c_study
 
         # Final status
         yield 0x0000, None

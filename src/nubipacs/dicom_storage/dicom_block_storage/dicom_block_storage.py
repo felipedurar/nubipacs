@@ -1,12 +1,15 @@
 from nubipacs.dicom_storage.dicom_storage_interface import DicomStorageInterface
 from nubipacs.dicom_storage.dicom_block_storage.schemas.dicom_block_storage_params import DicomBlockStorageParams
-from typing import Optional
+from typing import Optional, Any
 from pydantic import ValidationError
 from pydicom import Dataset, DataElement
-from pydicom.tag import Tag
+from pydicom.tag import Tag, BaseTag
 from pydicom.multival import MultiValue
-from pydicom.valuerep import PersonName
+from pydicom.valuerep import PersonName, VR
+from pydicom.datadict import dictionary_VR
 from mongoengine.context_managers import switch_db
+from mongoengine import NotUniqueError
+from pymongo.errors import DuplicateKeyError
 import os
 
 from nubipacs.dicom_storage.models.dcm_instance import DcmInstance
@@ -32,11 +35,6 @@ class DicomBlockStorage(DicomStorageInterface):
         # Validate Service Params
         self.name = name
         self.dicom_block_storage_params = params
-        # try:
-        #     self.dicom_block_storage_params = DicomBlockStorageParams(**params)
-        # except ValidationError as e:
-        #     print(e.json())
-        #     return True
 
         # Ensure the output path exists
         os.makedirs(self.dicom_block_storage_params.path, exist_ok=True)
@@ -61,29 +59,73 @@ class DicomBlockStorage(DicomStorageInterface):
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
             c_instance = DcmInstanceDB()
             for elem in dataset:
-                element_pair = self.filter_dicom_tag(elem)
-                if element_pair[0] in store_metadata_dicom_tags:
-                    if isinstance(element_pair[1], MultiValue):
-                        c_instance[element_pair[0]] = list(element_pair[1])
-                    elif isinstance(element_pair[1], PersonName):
-                        c_instance[element_pair[0]] = str(element_pair[1])
-                    else:
-                        c_instance[element_pair[0]] = element_pair[1]
-            c_instance.save()
+                hex_tag = self.get_hex_tag(elem.tag)
+                element_val = '<binary data skipped>' if self.is_binary_element(elem) else self.prepare_dcm_element_val(elem)
+                if hex_tag in store_metadata_dicom_tags:
+                    document_key = f"tag_{hex_tag}"
+                    c_instance[document_key] = self.prepare_dcm_element_val(element_val)
+            try:
+                print(c_instance)
+                c_instance.save()
+            except NotUniqueError as e:
+                # TODO: SHOULD UPDATE THE EXISTING ITEM!!
+                print("Duplicate detected:", e)
+            except DuplicateKeyError as e:
+                # TODO: SHOULD UPDATE THE EXISTING ITEM!!
+                print("Duplicate detected:", e)
 
-    def filter_dicom_tag(self, elem: DataElement):
-        tag_hex = f"{elem.tag.group:04X}{elem.tag.element:04X}"
+    def prepare_dcm_element_val(self, elem: Any):
+        if isinstance(elem, MultiValue):
+            return list(elem)
+        elif isinstance(elem, PersonName):
+            return str(elem)
+        else:
+            return elem
+
+    def get_hex_tag(self, tag: Tag):
+        return f"{tag.group:04X}{tag.element:04X}"
+
+    def is_binary_element(self, elem: DataElement):
         if elem.VR == 'OB' or elem.VR == 'OW' or elem.VR == 'OF' or elem.VR == 'UN' or elem.tag == Tag(0x7FE0,
                                                                                                        0x0010):  # PixelData
-            #print(f"{elem.tag} {tag_hex} {elem.name} = <binary data skipped>")
-            return (tag_hex, '<binary data skipped>')
-        else:
-            #print(f"{elem.tag} {tag_hex} {elem.name} = {elem.value}")
-            return (tag_hex, elem.value)
+            return True
+        return False
 
+    def find_dicom(self, query: Dataset):
+        # Extract DICOM tags used in the query
+        print("Tags used in query:")
+        for elem in query:
+            print(f"{elem.tag} - {elem.name} - {elem.value}")
 
-    def find_dicom(self, query):
-        pass
+        filters = {}
+        for elem in query:
+            print(f"{elem.tag} - {elem.name} - {elem.value}")
+            hex_tag = self.get_hex_tag(elem.tag)
+            if elem.value is not None:
+                document_key = f"tag_{hex_tag}"
+                filters[document_key] = elem.value
+
+        with switch_db(DcmInstance, self.name) as DcmInstanceDB:
+            studies_found = DcmInstanceDB.objects(**filters).limit(1000)
+
+            for c_study in studies_found:
+                c_study_dataset = Dataset()
+                data = c_study.to_mongo().to_dict()
+                for field, value in data.items():
+                    #print(f"{field}: {value}")
+                    tag_str = str(field).split('_')[1]
+                    c_tag = Tag(int(tag_str, 16))
+                    vr = dictionary_VR(c_tag)
+                    c_study_dataset.add_new(c_tag,vr, value)
+                    #c_study_dataset.add()
+
+                # match.add
+                # match.PatientName = 'DOE^JOHN'
+                # match.PatientID = '123456'
+                # match.StudyInstanceUID = '1.2.3.4.5.6'
+                # match.StudyDate = '20250101'
+                yield c_study_dataset
+
 
     def get_dicom(self, sop_instance_uid):
         pass
