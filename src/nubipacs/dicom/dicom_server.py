@@ -127,10 +127,15 @@ class DicomServer:
 
         # Get service and call storage handler
         c_storage_service = self.storage_services[requestor_ae_title]
-        c_storage_service.dicom_storage.save_dicom(ds)
+        c_storage_service.save_dicom(ds)
         return 0x0000
 
     def handle_find(self, event):
+        # Check for cancellation
+        if event.is_cancelled:
+            yield 0xFE00, None
+            return
+
         # Get AE Title of the requester
         requestor_ae_title = event.assoc.requestor.ae_title
         print(f"Incoming C-STORE from AE Title: {requestor_ae_title}")
@@ -147,7 +152,7 @@ class DicomServer:
 
         # Get service and call storage handler
         c_storage_service = self.storage_services[requestor_ae_title]
-        for c_study in c_storage_service.dicom_storage.find_dicom(ds):
+        for c_study in c_storage_service.find_dicom(ds):
             yield 0xFF00, c_study
 
         # Final status

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pydicom import Dataset
 
 class DicomStorageInterface(ABC):
 
@@ -7,11 +8,11 @@ class DicomStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def save_dicom(self, dataset):
+    def save_dicom(self, dataset: Dataset):
         pass
 
     @abstractmethod
-    def find_dicom(self, query):
+    def find_dicom(self, query: Dataset):
         pass
 
     @abstractmethod
