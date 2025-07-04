@@ -53,7 +53,7 @@ class DicomStorageService(PACSServiceInterface):
         self.start()
 
     def _run(self):
-        """ Keeping this because in the future i gonna perform runtime checks during service execution... """
+        """ Keeping this because in the future I'm going to perform runtime checks during service execution... """
         while self._running:
             import time
             time.sleep(10)
