@@ -16,5 +16,5 @@ class DicomStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def get_dicom(self, sop_instance_uid):
+    def get_dicom(self, query: Dataset):
         pass

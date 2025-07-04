@@ -17,5 +17,5 @@ class DicomStorageExtensionInterface(ABC):
         pass
 
     @abstractmethod
-    def get_dicom(self, sop_instance_uid):
+    def get_dicom_instance(self, db_entry):
         pass

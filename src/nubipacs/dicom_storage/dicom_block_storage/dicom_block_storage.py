@@ -3,7 +3,7 @@ from nubipacs.dicom_storage.dicom_storage_interface import DicomStorageInterface
 from nubipacs.dicom_storage.dicom_block_storage.schemas.dicom_block_storage_params import DicomBlockStorageParams
 from typing import Optional, Any
 from pydantic import ValidationError
-from pydicom import Dataset, DataElement
+from pydicom import Dataset, DataElement, dcmread
 from pydicom.tag import Tag, BaseTag
 from pydicom.multival import MultiValue
 from pydicom.valuerep import PersonName, VR
@@ -28,19 +28,29 @@ class DicomBlockStorage(DicomStorageExtensionInterface):
         # Ensure the output path exists
         os.makedirs(self.dicom_block_storage_params.path, exist_ok=True)
 
+    def build_series_directory_path(self, study_uid, series_uid):
+        study_path = os.path.join(self.dicom_block_storage_params.path, study_uid)
+        series_path = os.path.join(study_path, series_uid)
+        return series_path
+
+    def build_instance_path(self, study_uid, series_uid, instance_uid):
+        study_path = os.path.join(self.dicom_block_storage_params.path, study_uid)
+        series_path = os.path.join(study_path, series_uid)
+        os.makedirs(series_path, exist_ok=True)
+        return os.path.join(series_path, f"{instance_uid}.dcm")
+
     def save_dicom(self, dataset: Dataset, db_entry):
         # Extract UIDs
         study_uid = dataset.StudyInstanceUID
         series_uid = dataset.SeriesInstanceUID
         instance_uid = dataset.SOPInstanceUID
 
-        # Create directory structure
-        study_path = os.path.join(self.dicom_block_storage_params.path, study_uid)
-        series_path = os.path.join(study_path, series_uid)
+        # Create Series Path
+        series_path = self.build_series_directory_path(study_uid, series_uid)
         os.makedirs(series_path, exist_ok=True)
 
         # Save file
-        filename = os.path.join(series_path, f"{instance_uid}.dcm")
+        filename = self.build_instance_path(study_uid, series_uid, instance_uid)
         dataset.save_as(filename, write_like_original=False)
         print(f"Stored: {filename}")
 
@@ -49,5 +59,12 @@ class DicomBlockStorage(DicomStorageExtensionInterface):
         pass
 
 
-    def get_dicom(self, sop_instance_uid):
-        pass
+    def get_dicom_instance(self, db_entry):
+        # Extract UIDs
+        study_uid = db_entry['tag_0020000D']
+        series_uid = db_entry['tag_0020000E']
+        instance_uid = db_entry['tag_00080018']
+
+        # Read Local DCM
+        filename = self.build_instance_path(study_uid, series_uid, instance_uid)
+        return dcmread(filename)

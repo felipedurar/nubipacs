@@ -9,9 +9,9 @@
       "port": 11112,
       "aplication_entities": [
         {
-          "ae_title": "WEASIS_AE",
-          "allowed_ips": [],
-          "blocked_ips": [],
+          "ae_title": "WEASIS_TEST",
+          "ip_address": "localhost",
+          "port": 11113,
           "allowed_services": ["C-FIND, C-STORE", "C-GET", "C-MOVE", "C-ECHO"],
           "storage_service": "local-bs"
         }

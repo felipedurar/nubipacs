@@ -181,9 +181,10 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             studies_found = DcmInstanceDB.objects(**filters).limit(1000)
 
             for c_study in studies_found:
+                # TODO: Handle Cancellation HERE!
                 c_study_dataset = Dataset()
-                data = c_study.to_mongo().to_dict()
-                for field, value in data.items():
+                db_entry = c_study.to_mongo().to_dict()
+                for field, value in db_entry.items():
                     if not field.startswith(DB_TAG_FIELD_PREFIX):
                         continue
 
@@ -195,5 +196,37 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
                 yield c_study_dataset
 
-    def get_dicom(self, sop_instance_uid):
-        pass
+    def get_dicom(self, query: Dataset):
+        # Get Query Retrieve Level
+        query_retrieve_level = query.get((0x0008, 0x0052), None)
+        if query_retrieve_level in [None, '']:
+            query_retrieve_level = 'STUDY'
+
+        # Build Mongo Query based on C-FIND DataSet
+        filters = {}
+        for elem in query:
+            # Filter only Elements that are on the Instance Metadata List (The elements that are )
+            hex_tag = self.get_hex_tag(elem.tag)
+            if hex_tag in instance_metadata_tags and elem.value is not None:
+                prepared_value = self.prepare_dcm_element_val(elem.value)
+
+                # Ignore if it is an empty value
+                if isinstance(prepared_value, str) and not prepared_value:
+                    continue
+
+                document_key = self.get_db_field_name(hex_tag)
+                filters[document_key] = prepared_value
+        print("FILTERS")
+        print(filters)
+
+        with switch_db(DcmInstance, self.name) as DcmInstanceDB:
+            studies_found = DcmInstanceDB.objects(**filters).limit(1000)
+
+            for c_study in studies_found:
+                # TODO: Handle Cancellation HERE!
+                c_study_dataset = Dataset()
+                db_entry = c_study.to_mongo().to_dict()
+
+                dcm_ds = self.dicom_storage_extension.get_dicom_instance(db_entry)
+
+                yield dcm_ds
