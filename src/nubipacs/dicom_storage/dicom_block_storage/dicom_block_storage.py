@@ -58,7 +58,6 @@ class DicomBlockStorage(DicomStorageExtensionInterface):
     def find_dicom(self, query: Dataset):
         pass
 
-
     def get_dicom_instance(self, db_entry):
         # Extract UIDs
         study_uid = db_entry['tag_0020000D']
@@ -67,4 +66,4 @@ class DicomBlockStorage(DicomStorageExtensionInterface):
 
         # Read Local DCM
         filename = self.build_instance_path(study_uid, series_uid, instance_uid)
-        return dcmread(filename)
+        return dcmread(filename, defer_size='1 KB')

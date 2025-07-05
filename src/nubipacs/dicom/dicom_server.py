@@ -91,6 +91,7 @@ class DicomServer:
         self.handlers.append((evt.EVT_C_FIND, self.handle_find))
         self.handlers.append((evt.EVT_C_GET, self.handle_get))
         self.handlers.append((evt.EVT_C_MOVE, self.handle_move))
+        self.handlers.append((evt.EVT_CONN_CLOSE, self.handle_close))
 
         # Lazy Load the Services Manager
         from nubipacs.service_management.services_manager import ServicesManager
@@ -232,7 +233,7 @@ class DicomServer:
 
         # Get the dataset (the actual query fields)
         ds = event.identifier
-        print("C-GET Query Dataset:")
+        print("C-MOVE Query Dataset:")
         print(ds)
 
         assoc = event.assoc.ae.associate(
@@ -257,6 +258,10 @@ class DicomServer:
         else:
             # Unable to connect to move destination
             yield 0xA801, 0  # Move Destination unknown / cannot connect
+
+    def handle_close(self, event):
+        requestor_ae_title = event.assoc.requestor.ae_title
+        print(f"Incoming CLOSED CONNECTION from AE Title: {requestor_ae_title}")
 
     def start_server(self):
         dicom_bind_address = str(self.dicom_server_params.bind)

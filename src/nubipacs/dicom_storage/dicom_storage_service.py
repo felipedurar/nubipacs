@@ -174,8 +174,6 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
                 document_key = self.get_db_field_name(hex_tag)
                 filters[document_key] = prepared_value
-        print("FILTERS")
-        print(filters)
 
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
             studies_found = DcmInstanceDB.objects(**filters).limit(1000)
@@ -216,8 +214,6 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
                 document_key = self.get_db_field_name(hex_tag)
                 filters[document_key] = prepared_value
-        print("FILTERS")
-        print(filters)
 
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
             studies_found = DcmInstanceDB.objects(**filters).limit(1000)
