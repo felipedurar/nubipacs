@@ -13,7 +13,7 @@ from nubipacs.dicom.schemas.dicom_server_params import DicomServerParams
 from nubipacs.dicom_storage.dicom_storage_service import DicomStorageService
 from typing import Dict
 
-#debug_logger()
+debug_logger()
 
 class DicomServer:
     def __init__(self):
@@ -253,6 +253,8 @@ class DicomServer:
 
             # Release Association created for C-STORE
             assoc.release()
+
+            print(f"AMOUNT RETRIEVED {count}")
 
             yield 0x0000, count  # (status, # of completed sub-operations)
         else:

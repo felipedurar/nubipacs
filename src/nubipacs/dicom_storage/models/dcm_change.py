@@ -7,10 +7,4 @@ class DcmChange(Document):
     execution_started_datetime = DateTimeField(required=True)
     meta = {
         "collection": "dcm_changes"
-        # 'indexes': [
-        #     {
-        #         'fields': ['tag_00080018'],
-        #         'unique': True
-        #     }
-        # ]
     }

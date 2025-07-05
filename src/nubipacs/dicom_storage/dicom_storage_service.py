@@ -128,11 +128,14 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
         return elem.VR == 'OB' or elem.VR == 'OW' or elem.VR == 'OF' or elem.VR == 'UN' or elem.tag == Tag(0x7FE0,
                                                                                                        0x0010)  # PixelData
 
-    def save_dicom(self, dataset):
+    def save_dicom(self, dataset: Dataset):
         # Store Metadata on Database
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
             # Create the instance DB entry (a dictionary)
-            c_inst_dict = {}
+            instance_db_enty = {'dataset': {}, 'sop_instance_uid': dataset.SOPInstanceUID,
+                                'series_instance_uid': dataset.SeriesInstanceUID,
+                                'study_instance_uid': dataset.StudyInstanceUID}
+
             for elem in dataset:
                 # Generate the TAG (XXXXXXXX) and prepares the value to be added/updated to the DB
                 hex_tag = self.get_hex_tag(elem.tag)
@@ -141,21 +144,22 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 # Check if the Tag is in the list of Tags that are going to be stored on DB
                 if hex_tag in instance_metadata_tags:
                     document_key = self.get_db_field_name(hex_tag)
-                    c_inst_dict[document_key] = element_val
+                    instance_db_enty['dataset'][document_key] = element_val
 
             # Call the extension
             # Pass the c_inst_dict (DB Entry) in case the extension need to save anything on the DB
-            self.dicom_storage_extension.save_dicom(dataset, c_inst_dict)
+            self.dicom_storage_extension.save_dicom(dataset, instance_db_enty)
 
             # It creates or update if already exists
             # tag_00080018 = SOP Instance UID (Unique Instance ID)
-            DcmInstanceDB.objects(tag_00080018=c_inst_dict['tag_00080018']).update_one(
-                **c_inst_dict,
+            DcmInstanceDB.objects(sop_instance_uid=dataset.SOPInstanceUID).update_one(
+                **instance_db_enty,
                 upsert=True
             )
 
     def find_dicom(self, query: Dataset):
         # Get Query Retrieve Level
+        # WARNING: probably the query_retrieve_level will not come as a str
         query_retrieve_level = query.get((0x0008, 0x0052), None)
         if query_retrieve_level in [None, '']:
             query_retrieve_level = 'STUDY'
@@ -173,16 +177,16 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                     continue
 
                 document_key = self.get_db_field_name(hex_tag)
-                filters[document_key] = prepared_value
+                filters[f"dataset__{document_key}"] = prepared_value
 
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
-            studies_found = DcmInstanceDB.objects(**filters).limit(1000)
+            studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)
 
             for c_study in studies_found:
                 # TODO: Handle Cancellation HERE!
                 c_study_dataset = Dataset()
-                db_entry = c_study.to_mongo().to_dict()
-                for field, value in db_entry.items():
+                db_entry_dataset = c_study.to_mongo().to_dict()['dataset']
+                for field, value in db_entry_dataset.items():
                     if not field.startswith(DB_TAG_FIELD_PREFIX):
                         continue
 
@@ -190,12 +194,12 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                     c_tag = Tag(int(tag_str, 16))
                     vr = dictionary_VR(c_tag)
                     c_study_dataset.add_new(c_tag,vr, value)
-                    #c_study_dataset.add()
 
                 yield c_study_dataset
 
     def get_dicom(self, query: Dataset):
         # Get Query Retrieve Level
+        # WARNING: probably the query_retrieve_level will not come as a str
         query_retrieve_level = query.get((0x0008, 0x0052), None)
         if query_retrieve_level in [None, '']:
             query_retrieve_level = 'STUDY'
@@ -213,16 +217,14 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                     continue
 
                 document_key = self.get_db_field_name(hex_tag)
-                filters[document_key] = prepared_value
+                filters[f"dataset__{document_key}"] = prepared_value
 
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
-            studies_found = DcmInstanceDB.objects(**filters).limit(1000)
+            studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)
 
             for c_study in studies_found:
                 # TODO: Handle Cancellation HERE!
                 c_study_dataset = Dataset()
-                db_entry = c_study.to_mongo().to_dict()
+                db_entry_dataset = c_study.to_mongo().to_dict()['dataset']
 
-                dcm_ds = self.dicom_storage_extension.get_dicom_instance(db_entry)
-
-                yield dcm_ds
+                yield self.dicom_storage_extension.get_dicom_instance(db_entry_dataset)
