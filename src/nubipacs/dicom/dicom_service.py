@@ -13,7 +13,7 @@ class DicomService(PACSServiceInterface):
     def load_params(self, params):
         self.dicom_server.load_params(params)
 
-    def start(self):
+    async def start(self):
         if self._running:
             return
         self._running = True

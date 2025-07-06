@@ -1,5 +1,8 @@
 # Just a md to store some useful information
 
+## How do i run it?
+```python3 src/nubipacs/main.py```
+
 ## DicomWeb
 https://www.dicomstandard.org/using/dicomweb
 https://www.dicomstandard.org/using/dicomweb/restful-structure

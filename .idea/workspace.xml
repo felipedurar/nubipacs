@@ -5,15 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2008467c-08ef-49cb-9321-30c2e11eb4f1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_dataset.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_patient.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_serie.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_study.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_change_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_change.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_change.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_instance.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/models/dcm_instance.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nubipacs/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nubipacs/service_management/pacs_service_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/service_management/pacs_service_interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nubipacs/service_management/services_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/service_management/services_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.md" beforeDir="false" afterPath="$PROJECT_DIR$/utils.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,10 +30,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="2zA8DXhehyTNpQfTuWY7O9tDEC5" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -41,11 +41,12 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.NubiPacs.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/felipe_malaquias/Repositories/nubipacs/src/nubipacs/dicom_storage",
+    "last_opened_file_path": "/home/felipe_malaquias/Repositories/nubipacs/src/nubipacs/main.py",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
@@ -64,6 +65,31 @@
       <recent name="$PROJECT_DIR$/src/app/management" />
       <recent name="$PROJECT_DIR$/src/app/db" />
     </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="NubiPacs" type="PythonConfigurationType" factoryName="Python">
+      <module name="nubipacs" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.12 virtualenv at ~/Repositories/nubipacs/venv" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/nubipacs/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>

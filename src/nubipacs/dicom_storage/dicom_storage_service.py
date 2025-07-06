@@ -1,6 +1,8 @@
 from nubipacs.dicom_storage.dicom_block_storage.dicom_block_storage import DicomBlockStorage
+from nubipacs.dicom_storage.dicom_storage_change_service import DicomStorageChangeService
 from nubipacs.dicom_storage.dicom_storage_extension_interface import DicomStorageExtensionInterface
 from nubipacs.dicom_storage.dicom_storage_interface import DicomStorageInterface
+from nubipacs.dicom_storage.models.dcm_change import DcmChange
 from nubipacs.dicom_storage.models.dcm_instance import DcmInstance
 from nubipacs.dicom_storage.schemas.dicom_storage_params import DicomStorageParams
 from nubipacs.service_management.pacs_service_interface import PACSServiceInterface
@@ -13,6 +15,8 @@ from mongoengine.context_managers import switch_db
 from mongoengine import connect, register_connection
 from pydantic import ValidationError
 from typing import Optional, Any
+from datetime import datetime, timedelta
+import asyncio
 import threading
 
 patient_level_tags = [
@@ -56,11 +60,11 @@ instance_metadata_tags = [
 ]
 
 DB_TAG_FIELD_PREFIX = "tag_"
+dicom_storage_change_service = DicomStorageChangeService()
 
 class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
     def __init__(self, name, type):
-        self._thread = None
         self._running = False
         self.name = name
         self.type = type
@@ -89,12 +93,12 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 self.dicom_storage_extension.load_params(self.dicom_storage_params.params)
 
 
-    def start(self):
+    async def start(self):
         if self._running:
             return
         self._running = True
-        self._thread = threading.Thread(target=self._run, daemon=True)
-        self._thread.start()
+        asyncio.create_task(self.sync_dcm_changes())
+        asyncio.create_task(self.process_dcm_changes())
 
     def stop(self):
         self._running = False
@@ -103,11 +107,70 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
         self.stop()
         self.start()
 
-    def _run(self):
-        """ Keeping this because in the future I'm going to perform runtime checks during service execution... """
+    async def sync_dcm_changes(self):
         while self._running:
-            import time
-            time.sleep(10)
+            with switch_db(DcmChange, self.name) as DcmChangeDB:
+                change_list_db =  DcmChangeDB.objects()
+                change_list_local = dicom_storage_change_service.get_change_list()
+
+                # Synchronize Local Change List with the DB Change List
+                # Basically checks if the DB Change reports are older than the local ones, case it is older just update the change_datetime
+                for c_local_change in change_list_local:
+                    print(f"Local: {c_local_change}")
+                    change_report_found = next((x for x in change_list_db if x.study_instance_uid == c_local_change['study_instance_uid']), None)
+                    if change_report_found is None:
+                        # The Current Change Report doesn't exists on DB...
+                        change_report_found = DcmChangeDB()
+                        change_report_found.study_instance_uid = c_local_change['study_instance_uid']
+                        change_report_found.change_datetime = c_local_change['change_datetime']
+                        change_report_found.execution_started = False
+                        change_report_found.execution_started_datetime = None
+                        change_report_found.save()
+                    elif c_local_change['change_datetime'] > change_report_found.change_datetime:
+                        change_report_found.change_datetime = c_local_change['change_datetime']
+                        change_report_found.save()
+                # Clear List
+                dicom_storage_change_service.clear_change_list()
+
+            await asyncio.sleep(2)
+
+    async def process_dcm_changes(self):
+        while self._running:
+            with switch_db(DcmChange, self.name) as DcmChangeDB:
+                # Process the pending studies that reached the timeout
+                change_list_db = DcmChangeDB.objects.filter(**{ 'execution_started': False })
+                for c_db_change in change_list_db:
+                    c_db_change_dict = c_db_change.to_mongo().to_dict()
+                    print(f"DB: {c_db_change_dict}")
+
+                    if datetime.now() - c_db_change.change_datetime > timedelta(seconds=10):
+                        print(f" - Study '{c_db_change.study_instance_uid}' metadata processing triggered by change report timeout!")
+                        asyncio.create_task(self.process_study(c_db_change.id))
+
+            await asyncio.sleep(2)
+
+    async def process_study(self, doc_id):
+        #print(f" ## PROCESSING STUDY {study_instance_uid}")
+
+        with switch_db(DcmChange, self.name) as DcmChangeDB:
+            # Process the pending studies that reached the timeout
+            change_report = DcmChangeDB.objects.get(id=doc_id)
+            if change_report is None:
+                print(f"Error retrieving study change report {str(doc_id)}")
+                return
+
+            print(f" ## PROCESSING STUDY '{change_report.study_instance_uid}'")
+            change_report.execution_started = True
+            change_report.execution_started_datetime = datetime.now()
+            change_report.save()
+
+            # PERFORM THE PROCESSING HERE!!
+            await asyncio.sleep(2)
+
+            print(f" ## PROCESSING STUDY FINISHED '{change_report.study_instance_uid}'")
+
+            # Now that it was processed, delete it
+            change_report.delete()
 
     def prepare_dcm_element_val(self, elem: Any):
         """ Prepares the value of a DCM Element to be stored into the Database as a Value """
@@ -156,6 +219,9 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 **instance_db_enty,
                 upsert=True
             )
+
+            # Report Used
+            dicom_storage_change_service.report_study_changed(dataset.StudyInstanceUID)
 
     def find_dicom(self, query: Dataset):
         # Get Query Retrieve Level

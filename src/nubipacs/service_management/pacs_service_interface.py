@@ -15,7 +15,7 @@ class PACSServiceInterface(ABC):
         pass
 
     @abstractmethod
-    def start(self):
+    async def start(self):
         pass
 
     @abstractmethod

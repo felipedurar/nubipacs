@@ -65,10 +65,10 @@ class ServicesManager(metaclass=SingletonMeta):
                 case _:
                     print(f"Unknown Service - {c_service.name}")
 
-    def start_services(self):
+    async def start_services(self):
         for c_service in self.services:
             print(f"Starting Service {c_service.name} (Type: {c_service.type})")
-            c_service.start()
+            await c_service.start()
 
     def find_service_by_name(self, name):
         for c_service in self.services:

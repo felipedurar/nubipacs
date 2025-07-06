@@ -23,7 +23,7 @@ async def main():
     # Load and start the Services
     services_manager.load_services_config()
     services_manager.initialize_services()
-    services_manager.start_services()
+    await services_manager.start_services()
 
     await pacs_api.start_pacs_api()
 
