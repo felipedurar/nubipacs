@@ -113,7 +113,7 @@ class DicomServer:
                 return c_scu_ae
         return None
 
-    def handle_association_request(self, event):
+    def handle_association_request(self, event: Event):
         """
         Unfortunatelly pynetdicom doesn't allows us to access the PDU data here
         During the association request it would be the best place to filter IP and AETitles, but it is not possible :/
@@ -133,11 +133,11 @@ class DicomServer:
 
         return
 
-    def handle_echo(self, event):
+    def handle_echo(self, event: Event):
         print("Received a C-ECHO request")
         return 0x0000  # Success status
 
-    def handle_store(self, event):
+    def handle_store(self, event: Event):
         """Handle a C-STORE request event"""
         # Get the dataset from the event
         ds = event.dataset
@@ -149,10 +149,10 @@ class DicomServer:
 
         # Get service and call storage handler
         c_storage_service = self.storage_services[requestor_ae_title]
-        c_storage_service.save_dicom(ds)
+        c_storage_service.save_dicom(event, ds)
         return 0x0000
 
-    def handle_find(self, event):
+    def handle_find(self, event: Event):
         # Check for cancellation
         if event.is_cancelled:
             yield 0xFE00, None
@@ -174,13 +174,16 @@ class DicomServer:
 
         # Get service and call storage handler
         c_storage_service = self.storage_services[requestor_ae_title]
-        for c_study in c_storage_service.find_dicom(ds):
+        for c_study in c_storage_service.find_dicom(event, ds):
+            if c_study is None:
+                yield 0x0000, None
+                return
             yield 0xFF00, c_study
 
         # Final status
         yield 0x0000, None
 
-    def handle_get(self, event):
+    def handle_get(self, event: Event):
         """Generator function to handle a C-GET request."""
         # Check for cancellation
         if event.is_cancelled:
@@ -205,17 +208,22 @@ class DicomServer:
         c_storage_service = self.storage_services[requestor_ae_title]
 
         # Perform a Find to count the amount of images
-        query_result = list(c_storage_service.find_dicom(ds))
+        query_result = list(c_storage_service.find_dicom(event, ds))
         print(f"GET LEN {len(query_result)}")
         yield len(query_result)
 
-        for c_study in c_storage_service.get_dicom(ds):
-            yield 0xFF00, c_study
+        for c_study in c_storage_service.get_dicom(event, ds):
+            if c_study is None:
+                # TODO: Better validation to check when the operation was cancelled
+                yield 0x0000, None
+                return
+            else:
+                yield 0xFF00, c_study
 
         # Final status
         yield 0x0000, None
 
-    def handle_move(self, event):
+    def handle_move(self, event: Event):
         """Handle C-MOVE request."""
         print("Received C-MOVE request to move destination:", event.move_destination)
 
@@ -247,7 +255,10 @@ class DicomServer:
             c_storage_service = self.storage_services[requestor_ae_title]
 
             count = 0
-            for c_study in c_storage_service.get_dicom(ds):
+            for c_study in c_storage_service.get_dicom(event, ds):
+                if c_study is None:
+                    # TODO: Better validation to check when the operation was cancelled
+                    break
                 status = assoc.send_c_store(c_study)
                 count += 1
 
@@ -261,7 +272,7 @@ class DicomServer:
             # Unable to connect to move destination
             yield 0xA801, 0  # Move Destination unknown / cannot connect
 
-    def handle_close(self, event):
+    def handle_close(self, event: Event):
         requestor_ae_title = event.assoc.requestor.ae_title
         print(f"Incoming CLOSED CONNECTION from AE Title: {requestor_ae_title}")
 

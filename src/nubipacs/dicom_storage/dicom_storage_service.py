@@ -14,6 +14,7 @@ from pydicom.valuerep import PersonName, VR
 from pydicom import Dataset, DataElement
 from pydicom.tag import Tag, BaseTag
 from pydicom.datadict import dictionary_VR
+from pynetdicom.events import Event
 from mongoengine.context_managers import switch_db
 from mongoengine import connect, register_connection
 from pydantic import ValidationError
@@ -320,7 +321,7 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
         return elem.VR == 'OB' or elem.VR == 'OW' or elem.VR == 'OF' or elem.VR == 'UN' or elem.tag == Tag(0x7FE0,
                                                                                                        0x0010)  # PixelData
 
-    def save_dicom(self, dataset: Dataset):
+    def save_dicom(self, event: Event, dataset: Dataset):
         # Store Metadata on Database
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
             # Create the instance DB entry (a dictionary)
@@ -378,7 +379,7 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             return 'STUDY'
         return query_retrieve_level_str
 
-    def find_dicom(self, query: Dataset):
+    def find_dicom(self, event: Event, query: Dataset):
         query_retrieve_level = self.extract_query_retrieve_level(query)
 
         # Build Mongo Query based on C-FIND DataSet
@@ -401,7 +402,10 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)
 
             for c_study in studies_found:
-                # TODO: Handle Cancellation HERE!
+                # Check if the job was cancelled
+                if event.is_cancelled:
+                    return None
+
                 c_study_dataset = Dataset()
                 db_entry_dataset = c_study.to_mongo().to_dict()['dataset']
                 for field, value in db_entry_dataset.items():
@@ -415,7 +419,7 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
                 yield c_study_dataset
 
-    def get_dicom(self, query: Dataset):
+    def get_dicom(self, event: Event, query: Dataset):
         # Build Mongo Query based on C-FIND DataSet
         filters = {}
         for elem in query:
@@ -435,6 +439,9 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)
 
             for c_study in studies_found:
-                # TODO: Handle Cancellation HERE!
+                # Check if the job was cancelled
+                if event.is_cancelled:
+                    return None
+
                 db_entry_dataset = c_study.to_mongo().to_dict()['dataset']
                 yield self.dicom_storage_extension.get_dicom_instance(db_entry_dataset)

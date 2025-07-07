@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pydicom import Dataset
+from pynetdicom.events import Event
 
 class DicomStorageInterface(ABC):
 
@@ -8,13 +9,13 @@ class DicomStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def save_dicom(self, dataset: Dataset):
+    def save_dicom(self, event: Event, dataset: Dataset):
         pass
 
     @abstractmethod
-    def find_dicom(self, query: Dataset):
+    def find_dicom(self, event: Event, query: Dataset):
         pass
 
     @abstractmethod
-    def get_dicom(self, query: Dataset):
+    def get_dicom(self, event: Event, query: Dataset):
         pass
