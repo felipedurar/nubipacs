@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, IntField, DynamicField
+from mongoengine import Document, StringField, DynamicField
 
 class Service(Document):
     name = StringField(required=True,unique=True)

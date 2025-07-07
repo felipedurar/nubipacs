@@ -1,5 +1,6 @@
-from nubipacs.utils.singleton_meta import SingletonMeta
 from datetime import datetime
+
+from nubipacs.utils.singleton_meta import SingletonMeta
 
 STUDY_CHANGE_LIST = []
 

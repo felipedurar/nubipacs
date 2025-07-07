@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr, IPvAnyAddress
-from typing import List
+from pydantic import BaseModel
+
 
 class DicomBlockStorageParams(BaseModel):
     path: str

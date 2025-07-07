@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from nubipacs.database.db import init_db
 from routes import user
 

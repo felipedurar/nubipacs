@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from nubipacs.dicom_storage.models.dcm_instance import DcmInstance
 from pydicom import Dataset
+
 
 class DicomStorageExtensionInterface(ABC):
     @abstractmethod

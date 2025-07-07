@@ -1,8 +1,8 @@
-import asyncio
 import uvicorn
-import threading
 from fastapi import FastAPI
+
 from nubipacs.utils.singleton_meta import SingletonMeta
+
 
 class PacsAPI(metaclass=SingletonMeta):
     SERVICES_FILE = "services.json"

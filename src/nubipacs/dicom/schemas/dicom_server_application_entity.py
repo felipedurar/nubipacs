@@ -1,5 +1,7 @@
-from pydantic import BaseModel, EmailStr, IPvAnyAddress
 from typing import List
+
+from pydantic import BaseModel
+
 
 class DicomServerApplicationEntity(BaseModel):
     ae_title: str

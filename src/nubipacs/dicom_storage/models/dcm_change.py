@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, IntField, DynamicField, DynamicDocument, DateTimeField, BinaryField, BooleanField
+from mongoengine import Document, StringField, DateTimeField, BooleanField
 
 class DcmChange(Document):
     study_instance_uid = StringField(required=True)
