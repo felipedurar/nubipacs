@@ -353,12 +353,33 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             # Report Used
             dicom_storage_change_service.report_study_changed(dataset.StudyInstanceUID)
 
+    def query_level_to_entity(self, query_retrieve_level):
+        match query_retrieve_level:
+            case "PATIENT":
+                return DcmPatient
+            case "STUDY":
+                return DcmStudy
+            case "SERIES":
+                return DcmSerie
+            case "INSTANCE":
+                return DcmInstance
+            case "IMAGE":
+                return DcmInstance
+            case _:
+                return None
+
+    def extract_query_retrieve_level(self, dataset: Dataset):
+        query_retrieve_level_dcm = dataset.get((0x0008, 0x0052), None)
+        if query_retrieve_level_dcm is None:
+            return 'STUDY'
+
+        query_retrieve_level_str = str(query_retrieve_level_dcm.value)
+        if query_retrieve_level_str in [None, '']:
+            return 'STUDY'
+        return query_retrieve_level_str
+
     def find_dicom(self, query: Dataset):
-        # Get Query Retrieve Level
-        # WARNING: probably the query_retrieve_level will not come as a str
-        query_retrieve_level = query.get((0x0008, 0x0052), None)
-        if query_retrieve_level in [None, '']:
-            query_retrieve_level = 'STUDY'
+        query_retrieve_level = self.extract_query_retrieve_level(query)
 
         # Build Mongo Query based on C-FIND DataSet
         filters = {}
@@ -375,7 +396,8 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 document_key = self.get_db_field_name(hex_tag)
                 filters[f"dataset__{document_key}"] = prepared_value
 
-        with switch_db(DcmInstance, self.name) as DcmInstanceDB:
+        query_level_source = self.query_level_to_entity(query_retrieve_level)
+        with switch_db(query_level_source, self.name) as DcmInstanceDB:
             studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)
 
             for c_study in studies_found:
@@ -394,12 +416,6 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 yield c_study_dataset
 
     def get_dicom(self, query: Dataset):
-        # Get Query Retrieve Level
-        # WARNING: probably the query_retrieve_level will not come as a str
-        query_retrieve_level = query.get((0x0008, 0x0052), None)
-        if query_retrieve_level in [None, '']:
-            query_retrieve_level = 'STUDY'
-
         # Build Mongo Query based on C-FIND DataSet
         filters = {}
         for elem in query:
@@ -420,7 +436,5 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
             for c_study in studies_found:
                 # TODO: Handle Cancellation HERE!
-                c_study_dataset = Dataset()
                 db_entry_dataset = c_study.to_mongo().to_dict()['dataset']
-
                 yield self.dicom_storage_extension.get_dicom_instance(db_entry_dataset)
