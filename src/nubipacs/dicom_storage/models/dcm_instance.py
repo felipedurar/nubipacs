@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, EmbeddedDocumentField
+from mongoengine import Document, StringField, EmbeddedDocumentField, ListField
 
 from nubipacs.dicom_storage.models.dcm_dataset import DcmDataset
 
@@ -8,6 +8,7 @@ class DcmInstance(Document):
     series_instance_uid = StringField(required=True)
     study_instance_uid = StringField(required=True)
     patient_id = StringField(required=True)
+    binary_data_elements = ListField(StringField())
     dataset = EmbeddedDocumentField(DcmDataset)
     meta = {
         "collection": "dcm_instances",

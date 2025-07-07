@@ -330,17 +330,21 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             instance_db_enty = {'dataset': {}, 'sop_instance_uid': dataset.SOPInstanceUID,
                                 'series_instance_uid': dataset.SeriesInstanceUID,
                                 'study_instance_uid': dataset.StudyInstanceUID,
-                                'patient_id': dataset.PatientID}
+                                'patient_id': dataset.PatientID,
+                                'binary_data_elements': []}
 
             for elem in dataset:
                 # Generate the TAG (XXXXXXXX) and prepares the value to be added/updated to the DB
                 hex_tag = self.get_hex_tag(elem.tag)
-                element_val = '[BINARY]' if self.is_binary_element(elem) else self.prepare_dcm_element_val(elem.value)
 
-                # Check if the Tag is in the list of Tags that are going to be stored on DB
-                if hex_tag in instance_metadata_tags:
-                    document_key = self.get_db_field_name(hex_tag)
-                    instance_db_enty['dataset'][document_key] = element_val
+                if self.is_binary_element(elem):
+                    instance_db_enty['binary_data_elements'].append(hex_tag)
+                else:
+                    # I'm going to change it so it always stores all tags
+                    if hex_tag in instance_metadata_tags:
+                        element_val = self.prepare_dcm_element_val(elem.value)
+                        document_key = self.get_db_field_name(hex_tag)
+                        instance_db_enty['dataset'][document_key] = element_val
 
             # Call the extension
             # Pass the c_inst_dict (DB Entry) in case the extension need to save anything on the DB

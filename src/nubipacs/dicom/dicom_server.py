@@ -2,7 +2,7 @@ from typing import Dict
 from typing import Optional
 
 from pydantic import ValidationError
-from pynetdicom import AE, StoragePresentationContexts
+from pynetdicom import AE, StoragePresentationContexts, debug_logger
 from pynetdicom import evt, AllStoragePresentationContexts
 from pynetdicom.events import Event
 from pynetdicom.sop_class import StudyRootQueryRetrieveInformationModelFind, \
@@ -14,7 +14,7 @@ from nubipacs.dicom.schemas.dicom_server_params import DicomServerParams
 from nubipacs.dicom_storage.dicom_storage_service import DicomStorageService
 
 
-#debug_logger()
+debug_logger()
 
 class DicomServer:
     def __init__(self):
