@@ -1,4 +1,3 @@
-
 from pynetdicom import AE, evt, AllStoragePresentationContexts, VerificationPresentationContexts
 from pydicom.dataset import Dataset
 from pynetdicom import AE, debug_logger, StoragePresentationContexts
@@ -6,6 +5,7 @@ from pynetdicom.transport import ThreadedAssociationServer
 from pynetdicom.sop_class import StudyRootQueryRetrieveInformationModelFind, PatientRootQueryRetrieveInformationModelGet, StudyRootQueryRetrieveInformationModelGet, PatientRootQueryRetrieveInformationModelMove, StudyRootQueryRetrieveInformationModelMove
 from pynetdicom.sop_class import CTImageStorage, MRImageStorage, DigitalXRayImageStorageForPresentation
 from pynetdicom.events import Event
+from pydicom.uid import ImplicitVRLittleEndian
 from typing import Optional
 from pydantic import ValidationError
 import os, io
@@ -13,7 +13,7 @@ from nubipacs.dicom.schemas.dicom_server_params import DicomServerParams
 from nubipacs.dicom_storage.dicom_storage_service import DicomStorageService
 from typing import Dict
 
-debug_logger()
+#debug_logger()
 
 class DicomServer:
     def __init__(self):
@@ -43,13 +43,13 @@ class DicomServer:
 
         # C-STORE
         # Add supported presentation contexts
-        storage_classes = [
-            CTImageStorage,
-            MRImageStorage,
-            DigitalXRayImageStorageForPresentation
-        ]
-        for storage_sop in storage_classes:
-            self.scp_ae.add_supported_context(storage_sop)
+        # storage_classes = [
+        #     CTImageStorage,
+        #     MRImageStorage,
+        #     DigitalXRayImageStorageForPresentation
+        # ]
+        # for storage_sop in storage_classes:
+        #     self.scp_ae.add_supported_context(storage_sop)
 
         # C-GET
         # Add presentation context for C-GET (Query/Retrieve - GET)
@@ -61,8 +61,13 @@ class DicomServer:
         self.scp_ae.add_supported_context(StudyRootQueryRetrieveInformationModelMove)
         self.scp_ae.add_supported_context(PatientRootQueryRetrieveInformationModelMove)
 
-        for context in StoragePresentationContexts:
-            self.scp_ae.add_supported_context(context.abstract_syntax, ['1.2.840.10008.1.2.1'])
+        # for context in StoragePresentationContexts:
+        #     self.scp_ae.add_supported_context(context.abstract_syntax, ['1.2.840.10008.1.2.1'])
+
+        self.scp_ae.supported_contexts = list(StoragePresentationContexts)
+        self.scp_ae.requested_contexts = list(StoragePresentationContexts)
+        # for context in StoragePresentationContexts:
+        #     ae.add_supported_context(context.abstract_syntax, ['1.2.840.10008.1.2.1'])  # Explicit VR Little Endian
         # for context in StoragePresentationContexts:
         #     self.scp_ae.add_requested_context(context.abstract_syntax, ['1.2.840.10008.1.2.1'])
 
@@ -244,33 +249,48 @@ class DicomServer:
         print("C-MOVE Query Dataset:")
         print(ds)
 
-        assoc = event.assoc.ae.associate(
-            addr=scu_ae.ip_address,  # IP of move destination AE
-            port=scu_ae.port,  # Port of move destination AE
-            ae_title=event.move_destination,
-            contexts=StoragePresentationContexts
-        )
+        yield (scu_ae.ip_address, scu_ae.port)
 
-        if assoc.is_established:
-            c_storage_service = self.storage_services[requestor_ae_title]
+        c_storage_service = self.storage_services[requestor_ae_title]
 
-            count = 0
-            for c_study in c_storage_service.get_dicom(event, ds):
-                if c_study is None:
-                    # TODO: Better validation to check when the operation was cancelled
-                    break
-                status = assoc.send_c_store(c_study)
-                count += 1
+        instances_count = c_storage_service.count_at_level(ds, "INSTANCE")
+        print(f"COUNT INST {instances_count}")
+        yield instances_count
 
-            # Release Association created for C-STORE
-            assoc.release()
+        for c_study in c_storage_service.get_dicom(event, ds):
+            #c_study.file_meta.TransferSyntaxUID = ImplicitVRLittleEndian
+            yield (0xFF00, c_study)
 
-            print(f"AMOUNT RETRIEVED {count}")
 
-            yield 0x0000, count  # (status, # of completed sub-operations)
-        else:
-            # Unable to connect to move destination
-            yield 0xA801, 0  # Move Destination unknown / cannot connect
+
+
+            # assoc = event.assoc.ae.associate(
+        #     addr=scu_ae.ip_address,  # IP of move destination AE
+        #     port=scu_ae.port,  # Port of move destination AE
+        #     ae_title=event.move_destination,
+        #     contexts=StoragePresentationContexts
+        # )
+        #
+        # if assoc.is_established:
+        #
+        #
+        #     count = 0
+        #     for c_study in c_storage_service.get_dicom(event, ds):
+        #         if c_study is None:
+        #             # TODO: Better validation to check when the operation was cancelled
+        #             break
+        #         status = assoc.send_c_store(c_study)
+        #         count += 1
+        #
+        #     # Release Association created for C-STORE
+        #     assoc.release()
+        #
+        #     print(f"AMOUNT RETRIEVED {count}")
+        #
+        #     yield 0x0000, count  # (status, # of completed sub-operations)
+        # else:
+        #     # Unable to connect to move destination
+        #     yield 0xA801, 0  # Move Destination unknown / cannot connect
 
     def handle_close(self, event: Event):
         requestor_ae_title = event.assoc.requestor.ae_title
