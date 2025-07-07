@@ -4,6 +4,8 @@ from nubipacs.dicom_storage.dicom_storage_extension_interface import DicomStorag
 from nubipacs.dicom_storage.dicom_storage_interface import DicomStorageInterface
 from nubipacs.dicom_storage.models.dcm_change import DcmChange
 from nubipacs.dicom_storage.models.dcm_instance import DcmInstance
+from nubipacs.dicom_storage.models.dcm_serie import DcmSerie
+from nubipacs.dicom_storage.models.dcm_study import DcmStudy
 from nubipacs.dicom_storage.schemas.dicom_storage_params import DicomStorageParams
 from nubipacs.service_management.pacs_service_interface import PACSServiceInterface
 from pydicom.multival import MultiValue
@@ -14,10 +16,9 @@ from pydicom.datadict import dictionary_VR
 from mongoengine.context_managers import switch_db
 from mongoengine import connect, register_connection
 from pydantic import ValidationError
-from typing import Optional, Any
+from typing import Optional, Any, Dict
 from datetime import datetime, timedelta
 import asyncio
-import threading
 
 patient_level_tags = [
     "00100020", "00100010", "00100030", "00100040"
@@ -41,10 +42,14 @@ instance_level_tags = [
     "00280100", "00280004", "00280030"
 ]
 
+patient_metadata_tags = [
+    *patient_level_tags
+]
+
 study_metadata_tags = [
     *study_level_tags,
     *patient_level_tags
-],
+]
 
 series_metadata_tags = [
     *study_level_tags,
@@ -116,7 +121,7 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 # Synchronize Local Change List with the DB Change List
                 # Basically checks if the DB Change reports are older than the local ones, case it is older just update the change_datetime
                 for c_local_change in change_list_local:
-                    print(f"Local: {c_local_change}")
+                    #print(f"Local: {c_local_change}")
                     change_report_found = next((x for x in change_list_db if x.study_instance_uid == c_local_change['study_instance_uid']), None)
                     if change_report_found is None:
                         # The Current Change Report doesn't exists on DB...
@@ -140,18 +145,15 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 # Process the pending studies that reached the timeout
                 change_list_db = DcmChangeDB.objects.filter(**{ 'execution_started': False })
                 for c_db_change in change_list_db:
-                    c_db_change_dict = c_db_change.to_mongo().to_dict()
-                    print(f"DB: {c_db_change_dict}")
-
+                    #c_db_change_dict = c_db_change.to_mongo().to_dict()
+                    #print(f"DB: {c_db_change_dict}")
                     if datetime.now() - c_db_change.change_datetime > timedelta(seconds=10):
                         print(f" - Study '{c_db_change.study_instance_uid}' metadata processing triggered by change report timeout!")
-                        asyncio.create_task(self.process_study(c_db_change.id))
+                        asyncio.create_task(self.start_process_study_task(c_db_change.id))
 
             await asyncio.sleep(2)
 
-    async def process_study(self, doc_id):
-        #print(f" ## PROCESSING STUDY {study_instance_uid}")
-
+    async def start_process_study_task(self, doc_id):
         with switch_db(DcmChange, self.name) as DcmChangeDB:
             # Process the pending studies that reached the timeout
             change_report = DcmChangeDB.objects.get(id=doc_id)
@@ -164,13 +166,125 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             change_report.execution_started_datetime = datetime.now()
             change_report.save()
 
-            # PERFORM THE PROCESSING HERE!!
-            await asyncio.sleep(2)
+            await self.process_study(change_report.study_instance_uid)
 
-            print(f" ## PROCESSING STUDY FINISHED '{change_report.study_instance_uid}'")
-
-            # Now that it was processed, delete it
+            # Finish it
+            print(f" ## FINISHED PROCESSING STUDY '{change_report.study_instance_uid}'")
             change_report.delete()
+
+    async def process_study(self, study_instance_uid):
+        # Retrieve all study instances
+        instances = []
+        with switch_db(DcmInstance, self.name) as DcmInstanceDB:
+            instances_db = DcmInstanceDB.objects.filter(**{'study_instance_uid': study_instance_uid})
+            for c_instance_db in instances_db:
+                c_instance_dict = c_instance_db.to_mongo().to_dict()
+                instances.append(c_instance_dict)
+
+        delete_study = len(instances) == 0
+
+        if not delete_study:
+            integrity_result = await self.study_integrity_validation(instances)
+            if not integrity_result:
+                print(f"Integrity Check failed for study '{study_instance_uid}'")
+                # TODO: Check what to do when the integrity of a study doesn't matches
+
+        # Study and series entities
+        patient: Optional[Dict] = None
+        study: Optional[Dict] = None
+        series = []
+
+        # This set is just to make the series check process faster...
+        series_uids = set()
+
+        for c_instance in instances:
+            instance_dataset = c_instance['dataset']
+            series_instance_uid = c_instance['series_instance_uid']
+            study_instance_uid = c_instance['study_instance_uid']
+
+            # Process Patient
+            if patient is None:
+                patient = {
+                    'study_instance_uid': study_instance_uid,
+                    'dataset': {}
+                }
+
+                for field, value in instance_dataset.items():
+                    if not field.startswith(DB_TAG_FIELD_PREFIX):
+                        continue
+
+                    # Filter "Patient" categorized Tags and copy to the series entity
+                    tag_str = str(field).split('_')[1]
+                    if tag_str in patient_metadata_tags:
+                        patient['dataset'][tag_str] = value
+
+            # Process Study
+            if study is None:
+                study = {
+                    'study_instance_uid': study_instance_uid,
+                    'dataset': {}
+                }
+
+                for field, value in instance_dataset.items():
+                    if not field.startswith(DB_TAG_FIELD_PREFIX):
+                        continue
+
+                    # Filter "Study" categorized Tags and copy to the series entity
+                    tag_str = str(field).split('_')[1]
+                    if tag_str in study_metadata_tags:
+                        study['dataset'][field] = value
+
+            # Process Series
+            series_processed = series_instance_uid in series_uids
+            if not series_processed:
+                c_serie = {
+                    'series_instance_uid': series_instance_uid,
+                    'study_instance_uid': study_instance_uid,
+                    'dataset': {}
+                }
+
+                for field, value in instance_dataset.items():
+                    if not field.startswith(DB_TAG_FIELD_PREFIX):
+                        continue
+
+                    # Filter "Series" categorized Tags and copy to the series entity
+                    tag_str = str(field).split('_')[1]
+                    if tag_str in series_metadata_tags:
+                        c_serie['dataset'][field] = value
+
+                series.append(c_serie)
+                series_uids.add(series_instance_uid)
+
+        # Update Study
+        with switch_db(DcmStudy, self.name) as DcmStudyDB:
+            if delete_study:
+                study_found = DcmStudyDB.objects.get(study_instance_uid=study_instance_uid)
+                if study_found is not None:
+                    study_found.delete()
+            else:
+                DcmStudyDB.objects(study_instance_uid=study_instance_uid).update_one(
+                    **study,
+                    upsert=True
+                )
+
+        # Update Series
+        with switch_db(DcmSerie, self.name) as DcmSerieDB:
+            # Delete series that no longer exists (If the study was deleted, all the series will be deleted here too)
+            existing_series = DcmSerieDB.objects()
+            for c_serie in existing_series:
+                if c_serie.series_instance_uid not in series_uids:
+                    c_serie.delete()
+
+            # Create/Update the new ones
+            for c_serie in series:
+                DcmSerieDB.objects(series_instance_uid=c_serie['series_instance_uid']).update_one(
+                    **c_serie,
+                    upsert=True
+                )
+
+    async def study_integrity_validation(self, instance_list):
+        # TODO: Check if tag levels among the instances matches
+        return True
 
     def prepare_dcm_element_val(self, elem: Any):
         """ Prepares the value of a DCM Element to be stored into the Database as a Value """
