@@ -4,6 +4,7 @@ from nubipacs.dicom_storage.dicom_storage_extension_interface import DicomStorag
 from nubipacs.dicom_storage.dicom_storage_interface import DicomStorageInterface
 from nubipacs.dicom_storage.models.dcm_change import DcmChange
 from nubipacs.dicom_storage.models.dcm_instance import DcmInstance
+from nubipacs.dicom_storage.models.dcm_patient import DcmPatient
 from nubipacs.dicom_storage.models.dcm_serie import DcmSerie
 from nubipacs.dicom_storage.models.dcm_study import DcmStudy
 from nubipacs.dicom_storage.schemas.dicom_storage_params import DicomStorageParams
@@ -201,11 +202,12 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             instance_dataset = c_instance['dataset']
             series_instance_uid = c_instance['series_instance_uid']
             study_instance_uid = c_instance['study_instance_uid']
+            patient_id = c_instance['patient_id']
 
             # Process Patient
             if patient is None:
                 patient = {
-                    'study_instance_uid': study_instance_uid,
+                    'patient_id': patient_id,
                     'dataset': {}
                 }
 
@@ -222,6 +224,7 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             if study is None:
                 study = {
                     'study_instance_uid': study_instance_uid,
+                    'patient_id': patient_id,
                     'dataset': {}
                 }
 
@@ -240,6 +243,7 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
                 c_serie = {
                     'series_instance_uid': series_instance_uid,
                     'study_instance_uid': study_instance_uid,
+                    'patient_id': patient_id,
                     'dataset': {}
                 }
 
@@ -254,6 +258,17 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
                 series.append(c_serie)
                 series_uids.add(series_instance_uid)
+
+        # Update Patient
+        with switch_db(DcmPatient, self.name) as DcmPatientDB:
+            if delete_study:
+                # TODO: Check if the patient exists yet
+                pass
+            else:
+                DcmPatientDB.objects(patient_id=patient['patient_id']).update_one(
+                    **patient,
+                    upsert=True
+                )
 
         # Update Study
         with switch_db(DcmStudy, self.name) as DcmStudyDB:
@@ -311,7 +326,8 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             # Create the instance DB entry (a dictionary)
             instance_db_enty = {'dataset': {}, 'sop_instance_uid': dataset.SOPInstanceUID,
                                 'series_instance_uid': dataset.SeriesInstanceUID,
-                                'study_instance_uid': dataset.StudyInstanceUID}
+                                'study_instance_uid': dataset.StudyInstanceUID,
+                                'patient_id': dataset.PatientID}
 
             for elem in dataset:
                 # Generate the TAG (XXXXXXXX) and prepares the value to be added/updated to the DB
