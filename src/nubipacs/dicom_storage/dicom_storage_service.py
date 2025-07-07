@@ -379,10 +379,8 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
             return 'STUDY'
         return query_retrieve_level_str
 
-    def find_dicom(self, event: Event, query: Dataset):
-        query_retrieve_level = self.extract_query_retrieve_level(query)
-
-        # Build Mongo Query based on C-FIND DataSet
+    def build_dcm_filter(self, query: Dataset):
+        # Build Mongo Query based on operation DataSet
         filters = {}
         for elem in query:
             # Filter only Elements that are on the Instance Metadata List (The elements that are )
@@ -396,6 +394,20 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
                 document_key = self.get_db_field_name(hex_tag)
                 filters[f"dataset__{document_key}"] = prepared_value
+        return filters
+
+    def count_at_level(self, query: Dataset, query_retrieve_level: str):
+        filters = self.build_dcm_filter(query)
+
+        query_level_source = self.query_level_to_entity(query_retrieve_level)
+        with switch_db(query_level_source, self.name) as DcmInstanceDB:
+            # TODO: Improve the count logic (just count instead of retrieve the data and then count)
+            studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)
+            return len(studies_found)
+
+    def find_dicom(self, event: Event, query: Dataset):
+        query_retrieve_level = self.extract_query_retrieve_level(query)
+        filters = self.build_dcm_filter(query)
 
         query_level_source = self.query_level_to_entity(query_retrieve_level)
         with switch_db(query_level_source, self.name) as DcmInstanceDB:
@@ -421,19 +433,7 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
     def get_dicom(self, event: Event, query: Dataset):
         # Build Mongo Query based on C-FIND DataSet
-        filters = {}
-        for elem in query:
-            # Filter only Elements that are on the Instance Metadata List (The elements that are )
-            hex_tag = self.get_hex_tag(elem.tag)
-            if hex_tag in instance_metadata_tags and elem.value is not None:
-                prepared_value = self.prepare_dcm_element_val(elem.value)
-
-                # Ignore if it is an empty value
-                if isinstance(prepared_value, str) and not prepared_value:
-                    continue
-
-                document_key = self.get_db_field_name(hex_tag)
-                filters[f"dataset__{document_key}"] = prepared_value
+        filters = self.build_dcm_filter(query)
 
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
             studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)

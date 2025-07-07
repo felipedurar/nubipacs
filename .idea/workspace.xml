@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="2008467c-08ef-49cb-9321-30c2e11eb4f1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom/dicom_server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_interface.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nubipacs/dicom_storage/dicom_storage_service.py" afterDir="false" />
     </list>
@@ -38,17 +37,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.NubiPacs.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/felipe_malaquias/Repositories/nubipacs/src/nubipacs/main.py",
-    "settings.editor.selected.configurable": "preferences.keymap"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.NubiPacs.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/felipe_malaquias/Repositories/nubipacs/src/nubipacs/main.py&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/nubipacs/dicom_storage" />

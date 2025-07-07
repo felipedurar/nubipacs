@@ -13,6 +13,10 @@ class DicomStorageInterface(ABC):
         pass
 
     @abstractmethod
+    def count_at_level(self, query: Dataset, query_retrieve_level: str):
+        pass
+
+    @abstractmethod
     def find_dicom(self, event: Event, query: Dataset):
         pass
 
