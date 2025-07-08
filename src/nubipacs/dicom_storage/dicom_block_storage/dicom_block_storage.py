@@ -28,7 +28,7 @@ class DicomBlockStorage(DicomStorageExtensionInterface):
     def build_instance_path(self, study_uid, series_uid, instance_uid):
         study_path = os.path.join(self.dicom_block_storage_params.path, study_uid)
         series_path = os.path.join(study_path, series_uid)
-        os.makedirs(series_path, exist_ok=True)
+        #os.makedirs(series_path, exist_ok=True)
         return os.path.join(series_path, f"{instance_uid}.dcm")
 
     def save_dicom(self, dataset: Dataset, db_entry):
@@ -58,4 +58,6 @@ class DicomBlockStorage(DicomStorageExtensionInterface):
 
         # Read Local DCM
         filename = self.build_instance_path(study_uid, series_uid, instance_uid)
-        return dcmread(filename, defer_size='1 KB')
+        return dcmread(filename, force=True, defer_size="1 KB")
+
+

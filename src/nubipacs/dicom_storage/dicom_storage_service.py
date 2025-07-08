@@ -11,6 +11,7 @@ from pydicom.multival import MultiValue
 from pydicom.tag import Tag
 from pydicom.valuerep import PersonName
 from pynetdicom.events import Event
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from nubipacs.dicom_storage.dicom_block_storage.dicom_block_storage import DicomBlockStorage
 from nubipacs.dicom_storage.dicom_storage_change_service import DicomStorageChangeService
@@ -443,11 +444,13 @@ class DicomStorageService(PACSServiceInterface, DicomStorageInterface):
 
         with switch_db(DcmInstance, self.name) as DcmInstanceDB:
             studies_found = DcmInstanceDB.objects.filter(**filters).limit(1000)
+            studies_dataset = map(lambda c_study: c_study.to_mongo().to_dict()['dataset'], studies_found)
 
-            for c_study in studies_found:
-                # Check if the job was cancelled
-                if event.is_cancelled:
-                    return None
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                futures = {
+                    executor.submit(self.dicom_storage_extension.get_dicom_instance, c_study):
+                        c_study for c_study in studies_dataset
+                }
+                for future in as_completed(futures):
+                    yield future.result()
 
-                db_entry_dataset = c_study.to_mongo().to_dict()['dataset']
-                yield self.dicom_storage_extension.get_dicom_instance(db_entry_dataset)

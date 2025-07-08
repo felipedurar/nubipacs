@@ -250,7 +250,7 @@ class DicomServer:
         print("C-MOVE Query Dataset:")
         print(ds)
 
-        yield (scu_ae.ip_address, scu_ae.port)
+        yield scu_ae.ip_address, scu_ae.port
 
         c_storage_service = self.storage_services[requestor_ae_title]
 
@@ -259,8 +259,10 @@ class DicomServer:
         yield instances_count
 
         for c_study in c_storage_service.get_dicom(event, ds):
-            #c_study.file_meta.TransferSyntaxUID = ImplicitVRLittleEndian
-            yield (0xFF00, c_study)
+            # Check for cancellation
+            if event.is_cancelled:
+                yield 0xFE00, None
+            yield 0xFF00, c_study
 
 
 
